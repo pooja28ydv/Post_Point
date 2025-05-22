@@ -1,0 +1,72 @@
+<% layout("/layouts/boilerplate.ejs") %>
+ 
+   <div class="row">
+      <div class="col-8 offset-2">
+        <br><br>
+       <h3>Creating a New Blog</h3>
+
+       <% if (messages.error && messages.error.length > 0) { %>
+        <div class="alert alert-danger">
+            <%= messages.error %>
+        </div>
+    <% } %>
+    <% if (messages.success) { %>
+      <%= messages.success %>
+      <% } %>
+
+    
+      <form   method="POST" action="/listings" novalidate class="needs-validation" enctype="multipart/form-data" >
+        <div class="mb-3">
+          <label for="title" class="form-label">Title</label>
+          <input name="listing[title]"
+           placeholder=" Add a catchy title"
+            type="text"
+           class="form-control"
+           required
+           >
+           <div class="valid-feedback">Title looks good!</div>
+        </div>
+
+         <div class="mb-3">
+          <label for="description" class="form-label">Description</label>
+          <textarea  name="listing[description]"
+          class="form-control" 
+           placeholder="description" 
+            required
+            ></textarea>
+            <div class="invalid-feedback">
+              please enter  description 
+                </div>
+          </div>
+           <div class="mb-3">
+           
+           <label for="image" class="form-label">upload Image Link</label>
+           <input name="listing[image]" type="file" placeholder="enter image URL/LINK " class="form-control" required accept="image/*">
+           <div class="invalid-feedback">Please upload the image</div>
+          </div>
+         <br>
+         <div class="mb-3">
+          <label for="category" class="form-label" >Choose Category</label>
+          <select name="listing[category]" class="form-control" >
+            <option value="choose category"> Choose any category</option>
+            <option value="Animal">Animal</option>
+            <option value="Travel">Travel</option>
+            <option value="Food">Food</option>
+            <option value="Education">Education</option>
+            <option value="Art">Art</option>
+            <option value="Lifestyle">Lifestyle</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Sport">Sport</option>
+            <option value="Technology">Technology</option>
+            
+            <!-- Add more categories as needed -->
+          </select>
+         
+        </div>
+        <br><br>
+        <button class="btn btn-dark add-btn" >Add</button>
+        <br><br>
+      </form>
+    
+    </div>
+  </div>

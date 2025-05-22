@@ -1,0 +1,90 @@
+<%- layout("/layouts/boilerplate.ejs") %>
+
+    <div class="row mt-3">
+       <div class="col-8 offset-2">
+        <br><br>
+    <h3>Edit  Post</h3>
+
+    <% if (messages.error && messages.error.length > 0) { %>
+      <div class="alert alert-danger">
+          <%= messages.error %>
+      </div>
+  <% } %>  
+
+    <form 
+     method="POST"
+      action="/listings/<%= listing._id %>?_method=PUT" 
+      novalidate 
+      class="needs-validation"
+      enctype="multipart/form-data"
+      >
+     <div class="mb-3">
+      <label for="title" class="form-label">Title</label>
+        <input name="listing[title]"
+          value="<%= listing.title %>" 
+          type="text"
+          class="form-control"
+          required
+        >
+        <div class="valid-feedback">Title looks good!</div>
+        </div>
+         
+     <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+          <textarea  name="listing[description]"
+           class="form-control"
+           required
+           >
+         <%= listing.description %>
+        
+       </textarea>
+       <div class="valid-feedback">thank you 
+</div>
+<br><br>
+        
+     <!-- <div class="mb-3">
+      Original Listing Images <br/>
+      <img src="<%= originalImageUrl %>" alt="">
+      <br><br>
+      <label for="image" class="form-label">Image Link</label>
+         <input name="listing[image]"
+        type="file"
+        class="form-control"
+       >
+       <div class="invalid-feedback">Please upload valid link </div>
+     </div>
+      <br><br> -->
+
+      <div class="mb-3">
+        <label for="image" class="form-label">Image</label>
+        <% if (listing.image) { %>
+            <div>
+                <img src="<%= listing.image.url %>" alt="Current Image" style="max-width: 200px; max-height: 200px;">
+            </div>
+        <% } %>
+        <input type="file" name="listing[image]" class="form-control">
+        <small class="form-text text-muted">Upload a new image (optional). Only jpeg, jpg, png, gif allowed.</small>
+    </div>
+      <br><br>
+
+      <div class="mb-3">
+        <label for="category" class="form-label">Category</label>
+        <select name="listing[category]" class="form-control" required>
+           <option value="Animal" <%= listing.category === 'Animal' ? 'selected' : '' %>>Animal</option>
+            <option value="Travel" <%= listing.category === 'Travel' ? 'selected' : '' %>>Travel</option>
+            <option value="Food" <%= listing.category === 'Food' ? 'selected' : '' %>>Food</option>
+            <option value="Education" <%= listing.category === 'Education' ? 'selected' : '' %>>Education</option>
+            <option value="Art" <%= listing.category === 'Art' ? 'selected' : '' %>>Art</option>
+            <option value="Lifestyle" <%= listing.category === 'Lifestyle' ? 'selected' : '' %>>Lifestyle</option>
+            <option value="Entertainment" <%= listing.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
+            <option value="Sport" <%= listing.category === 'Personal' ? 'selected' : '' %>>Sport</option>
+            <option value="Technology" <%= listing.category === 'Technology' ? 'selected' : '' %>>Technology</option>
+            <!-- Add more categories as needed -->
+        </select>
+    </div>
+
+      <button class="btn btn-dark edit-btn mt-3">Edit</button>
+    </form>
+  </div>
+</div>
+
