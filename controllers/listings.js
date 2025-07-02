@@ -66,40 +66,13 @@ module.exports.showListing = ( async(req,res) => {
 });
 
 module.exports.createListing = async (req, res) => {
-    // const allowedCategories = [
-    //     "Animal", "Travel", "Food", "Education", "Art",
-    //     "Lifestyle", "Entertainment", "Sport", "Technology"
-    // ];
+   
     const { listing } = req.body;
     
     try {
-        // Validate category BEFORE save
-        // if (!listing || !listing.category || !allowedCategories.includes(listing.category)) {
-        //     // Re-render form with error and previously entered data
-        //     return res.status(400).redirect('/listings/new.ejs', {
-        //         errorMessage: 'Category is required and must be one of: ' + allowedCategories.join(', '),
-        //         listing // send back entered data to refill form
-        //     });
-        // }
-        
-        // // Continue with your image upload validation if any
-        // if (!req.file) {
-        //     return res.status(400).redirect('/listings/new.ejs', {
-        //         errorMessage: 'Image file is required.',
-        //         listing
-        //     });
-        // }
-        
-        // if (!listing || !listing.category || !allowedCategories.includes(listing.category)) {
-        //     req.flash('error', 'Category is required and must be one of: ' + allowedCategories.join(', '));
-        //      res.redirect('/listings/new.ejs');
-        // }
-        // if (!req.file) {
-        //     req.flash('error', 'Image file is required.');
-        //     res.redirect('/listings/new.ejs');
-        // }
 
-        // Your existing code for creating a listing
+
+        
         let url = req.file.path;
         let filename = req.file.filename;
     
@@ -119,16 +92,7 @@ module.exports.createListing = async (req, res) => {
         return res.redirect("/listings/new"); // Redirect back to the new listing form
     }
 
-   
-    //   let url = req.file.path;
-    //   let filename = req.file.filename;
-    //   //console.log(url,"...",filename);
-    // const newListing = new Listing(req.body.listing);
-    // newListing.owner = req.user._id;
-    // newListing.image = { url , filename };
-    // await newListing.save();
-    // req.flash("success", "New Listing Created");
-    // res.redirect("/listings");
+
 };
 
 
@@ -148,17 +112,7 @@ module.exports.renderEditForm = async (req,res) =>{
 
 
 module.exports.updateListing = async ( req,res) =>{
-    // let { id } = req.params;
-    // // let listing = await Listing.findById(id);
-    // let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
-    // if(typeof req.file !== "undefined"){
-    //     let url = req.file.path;
-    //      let filename = req.file.filename;
-    //     listing.image = { url , filename };
-    //     await listing.save();
-    // };
-    // req.flash("success"," Listing Updated!");
-    // res.redirect(`/listings/${id}`);
+    
      
     try {
         // Your existing code for updating a listing
