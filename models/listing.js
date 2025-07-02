@@ -8,13 +8,11 @@ const listingSchema = new mongoose.Schema({
            type: String,
            required: true,
        },
-
-       description: {
+     description: {
          type:String,
          required: true,
         },
-
-        image: {
+    image: {
          url:String,
          filename: String,
     },
@@ -22,7 +20,7 @@ const listingSchema = new mongoose.Schema({
          type: String,
          required: true,
     },
-   reviews: [
+   reviews:[
         {
             type: Schema.Types.ObjectId,
             ref : "Review",
