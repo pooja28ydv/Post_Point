@@ -1,3 +1,6 @@
+
+
+
 (() => {
     'use strict'
   
@@ -15,4 +18,4 @@
         form.classList.add('was-validated')
       }, false)
     })
-  })()
+  })();

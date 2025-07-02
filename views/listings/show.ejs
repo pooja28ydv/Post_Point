@@ -92,10 +92,10 @@
             
                 <% if (currUser  && review.author._id.equals(currUser ._id)) { %>
                   <a class="btn btn-sm btn-dark" href="/listings/<%= listing._id %>/reviews/<%= review._id %>/edit">Edit</a>
+                  <form class="mb-3" method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" >
+                    <button class="btn btn-sm btn-dark">Delete</button>
+                  </form>
                 <% } %>
-            <form class="mb-3" method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" >
-              <button class="btn btn-sm btn-dark">Delete</button>
-            </form>
           </div>
         </div>  
         <% } %>

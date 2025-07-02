@@ -26,8 +26,8 @@ module.exports.index = (async(req,res) =>{
     if (search && search.trim() !== "") {
         const searchTerm = search; // keep the original case
         filteredListings = filteredListings.filter(listing =>
-            listing.title.includes(searchTerm) ||
-            listing.description.includes(searchTerm)
+            listing.title.includes(searchTerm)
+            // || listing.description.includes(searchTerm)
         );
     }
 
@@ -37,7 +37,7 @@ module.exports.index = (async(req,res) =>{
 
     // Check if any listings were found after filtering
     if (filteredListings.length === 0) {
-        req.flash("error", "No listings found matching your search criteria.");
+        req.flash("error", "No Blog found matching your search criteria.");
         return res.redirect("/listings");
     }
 
@@ -50,15 +50,15 @@ module.exports.renderNewForm = async( req, res) => {
       res.render("listings/new.ejs");
 }
 
-module.exports.showListing = (async(req,res) => {
+module.exports.showListing = ( async(req,res) => {
     let {id} = req.params;
     if (!id) {
-        req.flash("error", "Listing ID is required.");
+        req.flash("error", "Blog ID is required.");
         return res.redirect("/listings");
     }
     const listing = await Listing.findById(id).populate({ path:"reviews", populate: {path: "author"},}).populate("owner");
     if( !listing ) {
-      req.flash("error","Listing you requested for does not exist!");
+      req.flash("error","Blog you requested for does not exist!");
       res.redirect("/listings");  
   }
      console.log(listing);
@@ -66,11 +66,12 @@ module.exports.showListing = (async(req,res) => {
 });
 
 module.exports.createListing = async (req, res) => {
-    const allowedCategories = [
-        "Animal", "Travel", "Food", "Education", "Art",
-        "Lifestyle", "Entertainment", "Sport", "Technology"
-    ];
+    // const allowedCategories = [
+    //     "Animal", "Travel", "Food", "Education", "Art",
+    //     "Lifestyle", "Entertainment", "Sport", "Technology"
+    // ];
     const { listing } = req.body;
+    
     try {
         // Validate category BEFORE save
         // if (!listing || !listing.category || !allowedCategories.includes(listing.category)) {
@@ -89,25 +90,27 @@ module.exports.createListing = async (req, res) => {
         //     });
         // }
         
-        if (!listing || !listing.category || !allowedCategories.includes(listing.category)) {
-            req.flash('error', 'Category is required and must be one of: ' + allowedCategories.join(', '));
-             res.redirect('/listings/new.ejs');
-        }
-        if (!req.file) {
-            req.flash('error', 'Image file is required.');
-            res.redirect('/listings/new.ejs');
-        }
+        // if (!listing || !listing.category || !allowedCategories.includes(listing.category)) {
+        //     req.flash('error', 'Category is required and must be one of: ' + allowedCategories.join(', '));
+        //      res.redirect('/listings/new.ejs');
+        // }
+        // if (!req.file) {
+        //     req.flash('error', 'Image file is required.');
+        //     res.redirect('/listings/new.ejs');
+        // }
 
         // Your existing code for creating a listing
         let url = req.file.path;
         let filename = req.file.filename;
     
-        const newListing = new Listing(req.body.listing);
+        const newListing = new Listing (req.body.listing);
+           
+     
       newListing.owner = req.user._id;
       newListing.image = { url,filename };
     //   newListing.category = req.body.listing.category;
       await newListing.save();
-      req.flash("success", "New Listing Created");
+      req.flash("success", "New Blog Created");
       res.redirect("/listings");
     
 
@@ -134,7 +137,7 @@ module.exports.renderEditForm = async (req,res) =>{
     let { id } = req.params;
     const listing = await Listing.findById(id);
     if ( !listing) {
-       req.flash("error", "Listing you request for edit doesn't exist");
+       req.flash("error", "Blog you request for edit doesn't exist");
         res.redirect("/listings");
    }
       let originalImageUrl = listing.image.url;
@@ -168,12 +171,12 @@ module.exports.updateListing = async ( req,res) =>{
                 listing.image = { url, filename };
                 await listing.save();
             }
-            req.flash("success", "Listing Updated!");
+            req.flash("success", "Blog Updated!");
             res.redirect(`/listings/${id}`);
         } catch (error) {
-            console.error("Error updating listing:", error);
+            console.error("Error updating ", error);
             if (!res.headersSent) {
-                req.flash("error", "Could not update listing.");
+                req.flash("error", "Could not update ");
                 res.redirect(`/listings/${id}/edit`);
             }
         }
@@ -195,15 +198,15 @@ module.exports.deleteListing = async (req,res) =>{
     try {
         const listing = await Listing.findByIdAndDelete(id);
         if (!listing) {
-            req.flash("error", "Listing not found.");
+            req.flash("error", "Blog not found.");
             return res.redirect("/listings");
         }
-        req.flash("success", "Listing deleted successfully.");
+        req.flash("success", "Blog deleted successfully.");
         res.redirect("/listings");
     } catch (error) {
-        console.error("Error deleting listing:", error);
+        console.error("Error deleting Blog:", error);
         if (!res.headersSent) {
-            req.flash("error", " listing delete ");
+            req.flash("error", " Blog delete ");
             res.redirect("/listings");
         }
     }

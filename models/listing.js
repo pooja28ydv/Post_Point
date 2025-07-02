@@ -13,6 +13,8 @@ const listingSchema = new mongoose.Schema({
          type:String,
          required: true,
         },
+
+       
        image: {
          url:String,
          filename: String,
@@ -21,6 +23,7 @@ const listingSchema = new mongoose.Schema({
          type: String,
          required: true,
     },
+   
     reviews: [
         {
             type: Schema.Types.ObjectId,
