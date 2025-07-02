@@ -27,7 +27,7 @@ module.exports.index = (async(req,res) =>{
         const searchTerm = search; // keep the original case
         filteredListings = filteredListings.filter(listing =>
             listing.title.includes(searchTerm)
-            // || listing.description.includes(searchTerm)
+          
         );
     }
 
@@ -189,11 +189,7 @@ module.exports.updateListing = async ( req,res) =>{
    };
 
 module.exports.deleteListing = async (req,res) =>{
-    //  let { id } = req.params;
-    //  let deletedListing = await Listing.findByIdAndDelete(id);
-    //  console.log(deletedListing);
-    //  req.flash("success", "Listing Deleted!");
-    // res.redirect("/listings");
+  
     const { id } = req.params;
     try {
         const listing = await Listing.findByIdAndDelete(id);

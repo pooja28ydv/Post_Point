@@ -22,12 +22,10 @@ const User = require("./models/user.js");
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
-const { DEC8_BIN } = require('mysql/lib/protocol/constants/charsets.js');
-// const multer = require('multer');
- //const MONGO_URL = "mongodb://127.0.0.1:27017/blogapp";
+
  const dbUrl = process.env.ATLASDB_URL;
 
-//const MONGO_URL = "mongodb://127.0.0.1:27017//BlogPostApp"
+
 
 main().then(() =>{
     console.log("connected to DB");
@@ -38,7 +36,7 @@ main().then(() =>{
 async function main() {
     try{
 
-        //  console.log("Database URL:", dbUrl);
+
         await mongoose.connect(dbUrl);
       
         console.log("MONGODB connected SUccessFUlly");
@@ -71,7 +69,7 @@ store.on("error", () => {
 
 
 const sessionOptions = {
-     store : store,
+    store : store,
     secret: process.env.SECRET,
     resave: false,
     saveUninitialized: true,
