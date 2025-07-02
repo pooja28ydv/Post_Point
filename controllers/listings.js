@@ -66,9 +66,9 @@ module.exports.showListing = ( async(req,res) => {
 });
 
 module.exports.createListing = async (req, res) => {
-   
-    const { listing } = req.body;
     
+    const { listing } = req.body;
+   
     try {     
         let url = req.file.path;
         let filename = req.file.filename;
