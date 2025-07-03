@@ -23,7 +23,7 @@ const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
- const dbUrl = process.env.ATLASDB_URL;
+ const dbUrl = process.env.MONGO_URL;
 
 
 
@@ -57,9 +57,9 @@ app.use(express.static(path.join(__dirname,"/public")));
 
 const store = MongoStore.create({
 
-      mongoUrl : process.env.dbUrl,
+      mongoUrl : process.env.MONGO_URL,
       crypto: {
-           secret: process.env.SECRET,
+           secret: process.env.SECRET  || 'defaultsecret',
       },
       touchAfter: 24 * 3600,
 });
