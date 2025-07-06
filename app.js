@@ -18,15 +18,17 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
 
-
+//Routers
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
+
+//MongoDb url
  const dbUrl = process.env.MONGO_URL;
 
 
-
+ //connection mongoDb
 main().then(() =>{
     console.log("connected to DB");
 }).catch((error) =>{
@@ -35,10 +37,7 @@ main().then(() =>{
 
 async function main() {
     try{
-
-
-        await mongoose.connect(dbUrl);
-      
+        await mongoose.connect(dbUrl);  
         console.log("MONGODB connected SUccessFUlly");
     } catch (error) {
         console.error('MongoDB connection error:', error);
@@ -53,6 +52,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(methodOverride("_method"));
 app.engine('ejs',ejsMate);
 app.use(express.static(path.join(__dirname,"/public")));
+
 
 
 const store = MongoStore.create({
@@ -81,18 +81,12 @@ const sessionOptions = {
     },
 };
 
-app.get("/login", ( req,res) =>{
-    res.render("/login");
-});
-
-
 app.use(session(sessionOptions));
 app.use(flash());
 
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
-
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
@@ -105,20 +99,9 @@ app.use(async (req,res,next) => {
     next();
 });
 
-
-// app.get("/demoUser", async (req,res) => {
-//     let fakeUser = new User({
-//         email: "pooja2812@gmail.com",
-//         username: "pooja"
-//     });
-//      let registeredUser = await User.register(fakeUser, "helloworld");
-//      res.send(registeredUser);
-// });
-
-
+app.use("/",userRouter);
 app.use("/listings", listingRouter)
 app.use("/listings", reviewRouter);
-app.use("/",userRouter);
 
 app.all("*", (req,res,next) =>{
     next( new ExpressError(404, "Page not found"));

@@ -1,7 +1,7 @@
- <% if(success && success.length) { %>
+ <% if(typeof success !== 'undefined' && success.length > 0) { %>
 
     <div class="alert alert-success alert-dismissable fade show col-6 offset-3 " role="alert">
-        <%= success %>
+        <%= success[0] %>
         <button 
         type="button"
          class="btn-close"
@@ -11,10 +11,10 @@
     </div>
  <% } %>
 
- <% if(error && error.length) { %>
+ <% if( typeof error !== 'undefined' && error.length > 0) { %>
 
    <div class="alert alert-danger alert-dismissable fade show col-6 offset-3 " role="alert">
-       <%= error %>
+       <%= error[0] %>
        <button 
        type="button"
         class="btn-close"
