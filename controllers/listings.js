@@ -11,7 +11,7 @@ module.exports.index = (async(req,res) =>{
 
     allListings.forEach(listing => {
         if (listing.reviews.length > 0) {
-            const totalRating = listing.reviews.reduce((acc, review) => acc + review.rating, 0);
+         const totalRating = listing.reviews.reduce((acc, review) => acc + review.rating, 0);
             listing.averageRating = totalRating / listing.reviews.length;
         } else {
             listing.averageRating = 0; // Set to 0 if there are no reviews
@@ -67,27 +67,33 @@ module.exports.showListing = ( async(req,res) => {
 
 module.exports.createListing = async (req, res) => {
     
-    console.log("Blog form submitted:", req.body);
-    const { listing } = req.body;
-    try {     
+//    conso le.log("Blog form submitted:", req.body);
+//     const { listing } = req.body;
+   // try {     
         let url = req.file.path;
         let filename = req.file.filename;
     
         const newListing = new Listing (req.body.listing);
-           
-     
-      newListing.owner = req.user._id;
-      newListing.image = { url,filename };
+        newListing.owner = req.user._id;
+        newListing.image = { url,filename };
     //   newListing.category = req.body.listing.category;
-      await newListing.save();
-      req.flash("success", "New Blog Created");
-       res.redirect("https://post-point.onrender.com/listings");
+    try{
+
+        const savedListing = await newListing.save();
+          req.flash("success", "New Blog Created");
+           res.redirect("/listings");
+           res.status(200).json({ success: true, data: savedListing });
+    } catch(err){
+        console.error("save failed", err);
+        res.status(json)({ error : "Failed to save data"});
+        res.redirect("/listings/new");
+    }
     
 
-    } catch (error) {
-        req.flash("error", error.message); // Flash the error message
-        return res.redirect("/listings/new"); // Redirect back to the new listing form
-    }
+    // } catch (error) {
+    //     req.flash("error", error.message); // Flash the error message
+    //     return res.redirect("/listings/new"); // Redirect back to the new listing form
+    // }
 
 
 };
