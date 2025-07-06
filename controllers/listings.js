@@ -81,7 +81,7 @@ module.exports.createListing = async (req, res) => {
     //   newListing.category = req.body.listing.category;
       await newListing.save();
       req.flash("success", "New Blog Created");
-      return res.redirect("/listings");
+       res.redirect("https://post-point.onrender.com/listings");
     
 
     } catch (error) {
