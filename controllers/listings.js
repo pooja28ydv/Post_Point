@@ -67,22 +67,21 @@ module.exports.showListing = ( async(req,res) => {
 
 module.exports.createListing = async (req, res) => {
     
-//    conso le.log("Blog form submitted:", req.body);
-    const { listing } = req.body.listing;
-   // try {     
+    
         let url = req.file.path;
         let filename = req.file.filename;
     
         const newListing = new Listing (req.body.listing);
         newListing.owner = req.user._id;
         newListing.image = { url,filename };
-    //   newListing.category = req.body.listing.category;
+  
     try{
-
+          
         const savedListing = await newListing.save();
-          req.flash("success", "New Blog Created");
-           res.redirect("/listings");
-           res.status(200).json({ success: true, data: savedListing });
+        req.flash("success", "New Blog Created");
+          
+          return res.redirect("/listings");
+     
     } catch(err){
         console.error("save failed", err);
         res.status(json)({ error : "Failed to save data"});
