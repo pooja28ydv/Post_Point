@@ -159,10 +159,10 @@ module.exports.renderEditForm = async (req,res) =>{
 
 module.exports.updateListing = async ( req,res) =>{
     
+    let { id } = req.params;
      
-    try {
+  
         // Your existing code for updating a listing
-        let { id } = req.params;
         try {
             let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
             
@@ -186,13 +186,12 @@ module.exports.updateListing = async ( req,res) =>{
                 res.redirect(`/listings/${id}/edit`);
 
         }
-    } catch (error) {
-        req.flash("error", error.message); // Flash the error message
-        return res.redirect(`/listings/${req.params.id}/edit`); // Redirect back to the edit form
-    }
-    
-   
-   };
+     } 
+    // catch (error) {
+    //     req.flash("error", error.message); // Flash the error message
+    //     return res.redirect(`/listings/${req.params.id}/edit`); // Redirect back to the edit form
+    // }
+
 
 module.exports.deleteListing = async (req,res) =>{
   
