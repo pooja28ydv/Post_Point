@@ -65,41 +65,81 @@ module.exports.showListing = ( async(req,res) => {
     res.render("listings/show.ejs", { listing });
 });
 
-module.exports.createListing = async (req, res) => {
+// module.exports.createListing = async (req, res) => {
     
-    try{  
+//     try{  
+//         if (!req.file) {
+//             req.flash("error", "Please upload an image file");
+//             return res.redirect("/listings/new");
+//         }
+    
+//         let url = req.file.path;
+//         let filename = req.file.filename;
+    
+//         const newListing = new Listing(req.body.listing);
+//         newListing.owner = req.user._id;
+//         newListing.image = { url,filename };
+  
+
+//         await newListing.save();
+//         req.flash("success", "New Blog Created");
+          
+//           return res.redirect("/listings");
+     
+//     } catch(err){
+//         console.error("save failed", err);
+//         res.status(500).json({ error : "Failed to save data"});
+//         res.redirect("/listings/new");
+//     }
+    
+
+//     // } catch (error) {
+//     //     req.flash("error", error.message); // Flash the error message
+//     //     return res.redirect("/listings/new"); // Redirect back to the new listing form
+//     // }
+
+
+// };
+
+
+module.exports.createListing = async (req, res) => {
+    try {
+        console.log("=== CREATE LISTING START ===");
+        console.log("User:", req.user ? req.user._id : "No user");
+        console.log("File:", req.file ? "Present" : "Missing");
+        console.log("Body:", req.body);
+
+        // Check if file upload was successful
         if (!req.file) {
+            console.log("ERROR: No file uploaded");
             req.flash("error", "Please upload an image file");
             return res.redirect("/listings/new");
         }
-    
+
         let url = req.file.path;
         let filename = req.file.filename;
-    
+        
         const newListing = new Listing(req.body.listing);
         newListing.owner = req.user._id;
-        newListing.image = { url,filename };
-  
+        newListing.image = { url, filename };
 
-        await newListing.save();
+        console.log("About to save listing...");
+        const savedListing = await newListing.save();
+        console.log("✅ Listing saved with ID:", savedListing._id);
+        
         req.flash("success", "New Blog Created");
-          
-          return res.redirect("/listings");
-     
-    } catch(err){
-        console.error("save failed", err);
-        res.status(500).json({ error : "Failed to save data"});
-        res.redirect("/listings/new");
+        return res.redirect("/listings");
+        
+    } catch (err) {
+        console.error("❌ CREATE LISTING ERROR:");
+        console.error("Message:", err.message);
+        console.error("Stack:", err.stack);
+        
+        // FIXED: Proper error response (no more crash!)
+        req.flash("error", "Failed to create blog: " + err.message);
+        return res.redirect("/listings/new");
     }
-    
-
-    // } catch (error) {
-    //     req.flash("error", error.message); // Flash the error message
-    //     return res.redirect("/listings/new"); // Redirect back to the new listing form
-    // }
-
-
-};
+}
 
 
 
