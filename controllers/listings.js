@@ -67,16 +67,20 @@ module.exports.showListing = ( async(req,res) => {
 
 module.exports.createListing = async (req, res) => {
     
+    try{  
+        if (!req.file) {
+            req.flash("error", "Please upload an image file");
+            return res.redirect("/listings/new");
+        }
     
         let url = req.file.path;
         let filename = req.file.filename;
     
-        const newListing = new Listing (req.body.listing);
+        const newListing = new Listing(req.body.listing);
         newListing.owner = req.user._id;
         newListing.image = { url,filename };
   
-    try{
-          
+
         await newListing.save();
         req.flash("success", "New Blog Created");
           
@@ -84,7 +88,7 @@ module.exports.createListing = async (req, res) => {
      
     } catch(err){
         console.error("save failed", err);
-        res.status(json)({ error : "Failed to save data"});
+        res.status(500).json({ error : "Failed to save data"});
         res.redirect("/listings/new");
     }
     
@@ -121,7 +125,13 @@ module.exports.updateListing = async ( req,res) =>{
         let { id } = req.params;
         try {
             let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
-            if (typeof req.file !== "undefined") {
+            
+            if (!listing) {
+                req.flash("error", "Blog not found");
+                return res.redirect("/listings");
+            }
+            
+            if ( req.file ) {
                 let url = req.file.path;
                 let filename = req.file.filename;
                 listing.image = { url, filename };
@@ -131,10 +141,10 @@ module.exports.updateListing = async ( req,res) =>{
             res.redirect(`/listings/${id}`);
         } catch (error) {
             console.error("Error updating ", error);
-            if (!res.headersSent) {
+          
                 req.flash("error", "Could not update ");
                 res.redirect(`/listings/${id}/edit`);
-            }
+
         }
     } catch (error) {
         req.flash("error", error.message); // Flash the error message
