@@ -105,7 +105,7 @@ app.use("/listings", listingRouter)
 app.use("/listings", reviewRouter);
 
 app.all("*", (req,res,next) =>{
-    next( new ExpressError(404, "Click to the Signup Page "));
+    next( new ExpressError(404, "page not found"));
 })
 
 // Add this to your app.js BEFORE your existing error handler
