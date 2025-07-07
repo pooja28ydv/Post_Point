@@ -49,19 +49,29 @@ const upload = multer({
 
 
 router.route("/")
-     .get( isLoggedIn,wrapAsync (listingController.index))
-     .post(
+    .get(isLoggedIn, wrapAsync(listingController.index))
+    .post(
         isLoggedIn,
+        (req, res, next) => {
+            console.log("POST /listings - Before upload middleware");
+            next();
+        },
         upload.single('listing[image]'),
         (req, res, next) => {
-            // Check for file validation error first
+            console.log("POST /listings - After upload middleware");
+            console.log("File validation error:", req.fileValidationError);
+            console.log("File:", req.file ? "Present" : "Missing");
+            
+            // Check for file validation error
             if (req.fileValidationError) {
+                console.log("File validation error:", req.fileValidationError);
                 req.flash('error', req.fileValidationError);
                 return res.redirect("/listings/new");
             }
             
             // Check if file was uploaded
             if (!req.file) {
+                console.log("No file uploaded");
                 req.flash('error', 'Please upload an image file');
                 return res.redirect("/listings/new");
             }
@@ -70,7 +80,7 @@ router.route("/")
         },
         validateListing,
         wrapAsync(listingController.createListing)
-);
+    );
     
  
 //NEW ROUTE

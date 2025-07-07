@@ -107,65 +107,87 @@ module.exports.createListing = async (req, res) => {
         console.log("=== CREATE LISTING START ===");
         console.log("User:", req.user ? req.user._id : "No user");
         console.log("File:", req.file ? "Present" : "Missing");
-        console.log("Body:", req.body);
+        console.log("Body:", JSON.stringify(req.body, null, 2));
 
-         // Log environment variables (remove in production)
-         console.log("Cloudinary Config:", {
-            cloud_name: process.env.CLOUD_NAME ? "Set" : "Missing",
-            api_key: process.env.CLOUD_API_KEY ? "Set" : "Missing",
-            api_secret: process.env.CLOUD_API_SECRET ? "Set" : "Missing"
-        });
+        // Basic validation first
+        if (!req.user) {
+            console.log("ERROR: No user found");
+            req.flash("error", "Please log in to create a blog");
+            return res.redirect("/login");
+        }
 
-        // Check if file upload was successful
         if (!req.file) {
             console.log("ERROR: No file uploaded");
             req.flash("error", "Please upload an image file");
             return res.redirect("/listings/new");
         }
-    
-           // Log file details
-           console.log("File details:", {
+
+        if (!req.body.listing) {
+            console.log("ERROR: No listing data");
+            req.flash("error", "Please fill in all required fields");
+            return res.redirect("/listings/new");
+        }
+
+        // Log file details
+        console.log("File details:", {
             path: req.file.path,
             filename: req.file.filename,
             mimetype: req.file.mimetype,
             size: req.file.size
         });
 
-        let url = req.file.path;
-        let filename = req.file.filename;
+        const { title, description, category } = req.body.listing;
         
-        if (!req.body.listing || !req.body.listing.title || !req.body.listing.description) {
-            console.log("ERROR: Missing required fields");
+        // Validate required fields
+        if (!title || !description || !category) {
+            console.log("ERROR: Missing required fields", { title, description, category });
             req.flash("error", "Please fill in all required fields");
             return res.redirect("/listings/new");
         }
 
-        const newListing = new Listing(req.body.listing);
-        newListing.owner = req.user._id;
-        newListing.image = { url, filename };
+        // Create new listing object
+        const listingData = {
+            title: title.trim(),
+            description: description.trim(),
+            category: category,
+            image: {
+                url: req.file.path,
+                filename: req.file.filename
+            },
+            owner: req.user._id
+        };
 
-        console.log("About to save listing...");
+        console.log("Creating listing with data:", listingData);
+
+        const newListing = new Listing(listingData);
         const savedListing = await newListing.save();
-        console.log("✅ Listing saved with ID:", savedListing._id);
         
-        req.flash("success", "New Blog Created");
+        console.log("✅ Listing saved successfully with ID:", savedListing._id);
+        
+        req.flash("success", "New Blog Created Successfully!");
         return res.redirect("/listings");
         
     } catch (err) {
         console.error("❌ CREATE LISTING ERROR:");
-        console.error("Message:", err.message);
-        console.error("Stack:", err.stack);
+        console.error("Error name:", err.name);
+        console.error("Error message:", err.message);
+        console.error("Error stack:", err.stack);
         
-           // Handle specific MongoDB errors
-           if (err.code === 11000) {
-            req.flash("error", "A blog with similar content already exists");
-        } else if (err.name === 'ValidationError') {
+        // Handle specific error types
+        let errorMessage = "Failed to create blog. Please try again.";
+        
+        if (err.name === 'ValidationError') {
             const errors = Object.values(err.errors).map(e => e.message);
-            req.flash("error", "Validation failed: " + errors.join(", "));
-        } else {
-            req.flash("error", "Failed to create blog: " + err.message);
+            errorMessage = "Validation failed: " + errors.join(", ");
+        } else if (err.code === 11000) {
+            errorMessage = "A blog with similar content already exists";
+        } else if (err.message.includes('cloudinary')) {
+            errorMessage = "Image upload failed. Please try again.";
+        } else if (err.message.includes('network') || err.message.includes('timeout')) {
+            errorMessage = "Network error. Please check your connection and try again.";
         }
-
+        
+        req.flash("error", errorMessage);
         return res.redirect("/listings/new");
     }
 }
