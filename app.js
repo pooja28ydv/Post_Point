@@ -152,7 +152,7 @@ app.use((err, req, res, next) => {
 });
 
 app.all("*", (req,res,next) =>{
-    next( new ExpressError(404, "page not found"));
+    next( new ExpressError(404, "Click on signup"));
 })
 
 app.use((err,req,res,next) =>{
