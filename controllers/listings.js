@@ -77,7 +77,7 @@ module.exports.createListing = async (req, res) => {
   
     try{
           
-        const savedListing = await newListing.save();
+        await newListing.save();
         req.flash("success", "New Blog Created");
           
           return res.redirect("/listings");
