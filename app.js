@@ -104,9 +104,7 @@ app.use("/",userRouter);
 app.use("/listings", listingRouter)
 app.use("/listings", reviewRouter);
 
-app.all("*", (req,res,next) =>{
-    next( new ExpressError(404, "page not found"));
-})
+
 
 // Add this to your app.js BEFORE your existing error handler
 
@@ -152,6 +150,10 @@ app.use((err, req, res, next) => {
     // Render error page
     res.status(statusCode).render("error.ejs", { err: { statusCode, message } });
 });
+
+app.all("*", (req,res,next) =>{
+    next( new ExpressError(404, "page not found"));
+})
 
 app.use((err,req,res,next) =>{
     let {statusCode = 500, message = "Something went wrong "} = err;
