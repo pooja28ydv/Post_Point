@@ -51,19 +51,25 @@ const upload = multer({
 router.route("/")
      .get( isLoggedIn,wrapAsync (listingController.index))
      .post(
-          isLoggedIn,
-          upload.single('listing[image]'), 
-          validateListing,
-          wrapAsync(async (req, res, next) => {
-            // Check if there was an error during the upload
+        isLoggedIn,
+        upload.single('listing[image]'),
+        (req, res, next) => {
+            // Check for file validation error first
             if (req.fileValidationError) {
                 req.flash('error', req.fileValidationError);
-                return res.redirect("/listings/new"); // Redirect back to the new listing page
+                return res.redirect("/listings/new");
             }
-            // Proceed to create the listing if no errors
-            await listingController.createListing(req, res, next);
-        })
-      //     wrapAsync (listingController.createListing)
+            
+            // Check if file was uploaded
+            if (!req.file) {
+                req.flash('error', 'Please upload an image file');
+                return res.redirect("/listings/new");
+            }
+            
+            next();
+        },
+        validateListing,
+        wrapAsync(listingController.createListing)
 );
     
  

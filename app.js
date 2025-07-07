@@ -114,6 +114,16 @@ app.use((err,req,res,next) =>{
 //   res.send(statusCode).send(message);
  } )
 
+ app.use((req, res, next) => {
+    if (req.method === 'POST' && req.path === '/listings') {
+        console.log("=== POST /listings DEBUG ===");
+        console.log("Headers:", req.headers);
+        console.log("Body:", req.body);
+        console.log("Files:", req.files);
+        console.log("User:", req.user ? req.user._id : "No user");
+    }
+    next();
+});
 
  const port = process.env.PORT || 8080;
 app.listen(port,() => {

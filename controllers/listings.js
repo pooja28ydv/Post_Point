@@ -109,16 +109,37 @@ module.exports.createListing = async (req, res) => {
         console.log("File:", req.file ? "Present" : "Missing");
         console.log("Body:", req.body);
 
+         // Log environment variables (remove in production)
+         console.log("Cloudinary Config:", {
+            cloud_name: process.env.CLOUD_NAME ? "Set" : "Missing",
+            api_key: process.env.CLOUD_API_KEY ? "Set" : "Missing",
+            api_secret: process.env.CLOUD_API_SECRET ? "Set" : "Missing"
+        });
+
         // Check if file upload was successful
         if (!req.file) {
             console.log("ERROR: No file uploaded");
             req.flash("error", "Please upload an image file");
             return res.redirect("/listings/new");
         }
+    
+           // Log file details
+           console.log("File details:", {
+            path: req.file.path,
+            filename: req.file.filename,
+            mimetype: req.file.mimetype,
+            size: req.file.size
+        });
 
         let url = req.file.path;
         let filename = req.file.filename;
         
+        if (!req.body.listing || !req.body.listing.title || !req.body.listing.description) {
+            console.log("ERROR: Missing required fields");
+            req.flash("error", "Please fill in all required fields");
+            return res.redirect("/listings/new");
+        }
+
         const newListing = new Listing(req.body.listing);
         newListing.owner = req.user._id;
         newListing.image = { url, filename };
@@ -135,8 +156,16 @@ module.exports.createListing = async (req, res) => {
         console.error("Message:", err.message);
         console.error("Stack:", err.stack);
         
-        // FIXED: Proper error response (no more crash!)
-        req.flash("error", "Failed to create blog: " + err.message);
+           // Handle specific MongoDB errors
+           if (err.code === 11000) {
+            req.flash("error", "A blog with similar content already exists");
+        } else if (err.name === 'ValidationError') {
+            const errors = Object.values(err.errors).map(e => e.message);
+            req.flash("error", "Validation failed: " + errors.join(", "));
+        } else {
+            req.flash("error", "Failed to create blog: " + err.message);
+        }
+
         return res.redirect("/listings/new");
     }
 }
