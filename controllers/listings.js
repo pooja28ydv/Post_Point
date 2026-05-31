@@ -24,21 +24,18 @@ module.exports.index = (async(req,res) =>{
     let filteredListings = allListings;
 
     if (search && search.trim() !== "") {
-        const searchTerm = search; // keep the original case
+        const searchTerm = search.toLowerCase();
         filteredListings = filteredListings.filter(listing =>
-            listing.title.includes(searchTerm)
-          
+            (listing.title && listing.title.toLowerCase().includes(searchTerm)) ||
+            (listing.description && listing.description.toLowerCase().includes(searchTerm)) ||
+            (listing.category && listing.category.toLowerCase().includes(searchTerm))
         );
     }
 
-    if (category && category !== "Choose category") {
-        filteredListings = filteredListings.filter(listing => listing.category === category);
-    }
-
-    // Check if any listings were found after filtering
-    if (filteredListings.length === 0) {
-        req.flash("error", "No Blog found matching your search criteria.");
-        return res.redirect("/listings");
+    if (category && category !== "Choose category" && category !== "choose category") {
+        filteredListings = filteredListings.filter(listing => 
+            listing.category && listing.category.toLowerCase() === category.toLowerCase()
+        );
     }
 
     res.render("listings/index.ejs", { allListings: filteredListings, search, category });
@@ -107,86 +104,86 @@ module.exports.createListing = async (req, res) => {
         console.log("=== CREATE LISTING START ===");
         console.log("User:", req.user ? req.user._id : "No user");
         console.log("File:", req.file ? "Present" : "Missing");
-        console.log("Body:", JSON.stringify(req.body, null, 2));
+        console.log("AI Image URL:", req.body.ai_image_url ? "Present (length: " + req.body.ai_image_url.length + ")" : "Missing");
 
-        // Basic validation first
         if (!req.user) {
-            console.log("ERROR: No user found");
             req.flash("error", "Please log in to create a blog");
             return res.redirect("/login");
         }
 
-        if (!req.file) {
-            console.log("ERROR: No file uploaded");
-            req.flash("error", "Please upload an image file");
-            return res.redirect("/listings/new");
-        }
-
         if (!req.body.listing) {
-            console.log("ERROR: No listing data");
             req.flash("error", "Please fill in all required fields");
             return res.redirect("/listings/new");
         }
-
-        // Log file details
-        console.log("File details:", {
-            path: req.file.path,
-            filename: req.file.filename,
-            mimetype: req.file.mimetype,
-            size: req.file.size
-        });
 
         const { title, description, category } = req.body.listing;
-        
-        // Validate required fields
         if (!title || !description || !category) {
-            console.log("ERROR: Missing required fields", { title, description, category });
             req.flash("error", "Please fill in all required fields");
             return res.redirect("/listings/new");
         }
 
-        // Create new listing object
+        // ─── Determine image source ─────────────────────────────────────────
+        let imageData = null;
+        const cloudinary = require("cloudinary").v2;
+
+        if (req.file) {
+            // ✅ Normal file upload via Multer → Cloudinary
+            imageData = { url: req.file.path, filename: req.file.filename };
+            console.log("Using uploaded file:", imageData.url);
+
+        } else if (req.body.ai_image_url && req.body.ai_image_url.trim()) {
+            const aiUrl = req.body.ai_image_url.trim();
+            console.log("Uploading AI image to Cloudinary...");
+            try {
+                // Cloudinary accepts both external URLs and base64 data URIs natively
+                const uploaded = await cloudinary.uploader.upload(aiUrl, {
+                    folder: "Blog_App",
+                    resource_type: "image",
+                    transformation: [{ width: 800, height: 450, crop: "fill", quality: "auto" }]
+                });
+                imageData = { url: uploaded.secure_url, filename: uploaded.public_id };
+                console.log("✅ AI image uploaded to Cloudinary:", imageData.url);
+            } catch (uploadErr) {
+                console.error("Cloudinary AI upload failed:", uploadErr.message);
+                // Use URL directly as fallback (works for Pollinations.ai)
+                imageData = { url: aiUrl, filename: "ai-generated" };
+                console.log("Using AI URL directly as fallback");
+            }
+        } else {
+            req.flash("error", "Please upload an image or generate one with AI");
+            return res.redirect("/listings/new");
+        }
+
+        // ─── Create and save listing ────────────────────────────────────────
         const listingData = {
             title: title.trim(),
             description: description.trim(),
             category: category,
-            image: {
-                url: req.file.path,
-                filename: req.file.filename
-            },
+            image: imageData,
             owner: req.user._id
         };
 
-        console.log("Creating listing with data:", listingData);
+        console.log("Creating listing with data:", { ...listingData, image: { url: listingData.image.url.substring(0, 80) + "..." } });
 
         const newListing = new Listing(listingData);
         const savedListing = await newListing.save();
-        
+
         console.log("✅ Listing saved successfully with ID:", savedListing._id);
-        
         req.flash("success", "New Blog Created Successfully!");
         return res.redirect("/listings");
-        
+
     } catch (err) {
-        console.error("❌ CREATE LISTING ERROR:");
-        console.error("Error name:", err.name);
-        console.error("Error message:", err.message);
-        console.error("Error stack:", err.stack);
-        
-        // Handle specific error types
+        console.error("❌ CREATE LISTING ERROR:", err.name, err.message);
+
         let errorMessage = "Failed to create blog. Please try again.";
-        
         if (err.name === 'ValidationError') {
-            const errors = Object.values(err.errors).map(e => e.message);
-            errorMessage = "Validation failed: " + errors.join(", ");
+            errorMessage = "Validation failed: " + Object.values(err.errors).map(e => e.message).join(", ");
         } else if (err.code === 11000) {
             errorMessage = "A blog with similar content already exists";
         } else if (err.message.includes('cloudinary')) {
             errorMessage = "Image upload failed. Please try again.";
-        } else if (err.message.includes('network') || err.message.includes('timeout')) {
-            errorMessage = "Network error. Please check your connection and try again.";
         }
-        
+
         req.flash("error", errorMessage);
         return res.redirect("/listings/new");
     }
@@ -208,40 +205,52 @@ module.exports.renderEditForm = async (req,res) =>{
 
 
 
-module.exports.updateListing = async ( req,res) =>{
-    
+module.exports.updateListing = async (req, res) => {
     let { id } = req.params;
-     
-  
-        // Your existing code for updating a listing
-        try {
-            let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
-            
-            if (!listing) {
-                req.flash("error", "Blog not found");
-                return res.redirect("/listings");
-            }
-            
-            if ( req.file ) {
-                let url = req.file.path;
-                let filename = req.file.filename;
-                listing.image = { url, filename };
+    try {
+        let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+
+        if (!listing) {
+            req.flash("error", "Blog not found");
+            return res.redirect("/listings");
+        }
+
+        if (req.file) {
+            // ✅ Manual file upload
+            listing.image = { url: req.file.path, filename: req.file.filename };
+            await listing.save();
+
+        } else if (req.body.ai_image_url && req.body.ai_image_url.trim()) {
+            // ✅ AI-generated image — upload to Cloudinary automatically
+            const cloudinary = require("cloudinary").v2;
+            const aiUrl = req.body.ai_image_url.trim();
+            try {
+                const uploaded = await cloudinary.uploader.upload(aiUrl, {
+                    folder: "Blog_App",
+                    resource_type: "image",
+                    transformation: [{ width: 800, height: 450, crop: "fill", quality: "auto" }]
+                });
+                listing.image = { url: uploaded.secure_url, filename: uploaded.public_id };
+                await listing.save();
+                console.log("✅ AI image saved:", uploaded.secure_url);
+            } catch (uploadErr) {
+                console.error("Cloudinary AI upload error:", uploadErr.message);
+                listing.image = { url: aiUrl, filename: "ai-generated" };
                 await listing.save();
             }
-            req.flash("success", "Blog Updated!");
-            res.redirect(`/listings/${id}`);
-        } catch (error) {
-            console.error("Error updating ", error);
-          
-                req.flash("error", "Could not update ");
-                res.redirect(`/listings/${id}/edit`);
-
         }
-     } 
-    // catch (error) {
-    //     req.flash("error", error.message); // Flash the error message
-    //     return res.redirect(`/listings/${req.params.id}/edit`); // Redirect back to the edit form
-    // }
+        // If no file and no AI URL → keep existing image unchanged
+
+        req.flash("success", "Blog Updated!");
+        res.redirect(`/listings/${id}`);
+    } catch (error) {
+        console.error("Error updating listing:", error);
+        req.flash("error", "Could not update blog");
+        res.redirect(`/listings/${id}/edit`);
+    }
+};
+
+
 
 
 module.exports.deleteListing = async (req,res) =>{

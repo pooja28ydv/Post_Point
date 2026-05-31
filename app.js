@@ -22,6 +22,7 @@ const User = require("./models/user.js");
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
+const aiRouter = require("./routes/ai.js");
 
 
 //MongoDb url
@@ -103,64 +104,39 @@ app.use(async (req,res,next) => {
 app.use("/",userRouter);
 app.use("/listings", listingRouter)
 app.use("/listings", reviewRouter);
+app.use("/api/ai", aiRouter);
 
 
 
-// Add this to your app.js BEFORE your existing error handler
-
-// Catch unhandled promise rejections
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-    // Don't exit the process, just log the error
+// ─── 404 catch-all (must be BEFORE error handlers) ─────────────────────────
+app.all("*", (req, res, next) => {
+    next(new ExpressError(404, "Page not found"));
 });
 
-// Catch uncaught exceptions
-process.on('uncaughtException', (error) => {
-    console.error('Uncaught Exception:', error);
-    // Don't exit the process, just log the error
-});
-
-// Enhanced error handler - replace your existing error handler with this
+// ─── Global error handler ────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
     console.error("=== ERROR HANDLER ===");
     console.error("Error name:", err.name);
     console.error("Error message:", err.message);
-    console.error("Error stack:", err.stack);
     console.error("Request URL:", req.url);
     console.error("Request method:", req.method);
-    
+
     let { statusCode = 500, message = "Something went wrong" } = err;
-    
-    // Don't expose sensitive error details in production
-    if (process.env.NODE_ENV === 'production') {
-        message = statusCode === 500 ? "Internal Server Error" : message;
-    }
-    
-    // If headers are already sent, delegate to default Express error handler
+
     if (res.headersSent) {
         return next(err);
     }
-    
-    // Flash error message and redirect for form submissions
-    if (req.method === 'POST' && req.path.includes('/listings')) {
-        req.flash("error", "Something went wrong. Please try again.");
-        return res.redirect("/listings/new");
+
+    // ✅ API routes → always return JSON, never HTML
+    const isApiRoute = req.path.startsWith("/api/");
+    if (isApiRoute) {
+        return res.status(statusCode).json({ error: message });
     }
-    
-    // Render error page
+
+    // Page routes → render error page
     res.status(statusCode).render("error.ejs", { err: { statusCode, message } });
 });
 
-app.all("*", (req,res,next) =>{
-    
-    next( new ExpressError(404, "Click on signup"));
-})
-
-app.use((err,req,res,next) =>{
-    let {statusCode = 500, message = "Something went wrong "} = err;
-     res.status(statusCode).render("error.ejs", { err });       
-//   res.send(statusCode).send(message);
- } )
 
 
 

@@ -1,90 +1,200 @@
 <%- layout("/layouts/boilerplate.ejs") %>
 
-    <div class="row mt-3">
-       <div class="col-8 offset-2">
-        <br><br>
-    <h3>Edit  Post</h3>
+<div class="row mt-3">
+  <div class="col-8 offset-2">
+    <br><br>
+    <h3>Edit Post</h3>
 
     <% if (messages.error && messages.error.length > 0) { %>
-      <div class="alert alert-danger">
-          <%= messages.error %>
-      </div>
-  <% } %>  
+      <div class="alert alert-danger"><%= messages.error %></div>
+    <% } %>
 
-    <form 
-     method="POST"
-      action="/listings/<%= listing._id %>?_method=PUT" 
-      novalidate 
-      class="needs-validation"
-      enctype="multipart/form-data"
-      >
-     <div class="mb-3">
-      <label for="title" class="form-label">Title</label>
-        <input name="listing[title]"
-          value="<%= listing.title %>" 
-          type="text"
-          class="form-control"
-          required
-        >
-        <div class="valid-feedback">Title looks good!</div>
-        </div>
-         
-     <div class="mb-3">
-      <label for="description" class="form-label">Description</label>
-          <textarea  name="listing[description]"
-           class="form-control"
-           required
-           >
-         <%= listing.description %>
-        
-       </textarea>
-       <div class="valid-feedback">thank you 
-</div>
-<br><br>
-        
-     <!-- <div class="mb-3">
-      Original Listing Images <br/>
-      <img src="<%= originalImageUrl %>" alt="">
-      <br><br>
-      <label for="image" class="form-label">Image Link</label>
-         <input name="listing[image]"
-        type="file"
-        class="form-control"
-       >
-       <div class="invalid-feedback">Please upload valid link </div>
-     </div>
-      <br><br> -->
+    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT"
+          novalidate class="needs-validation" enctype="multipart/form-data">
 
+      <!-- Title -->
       <div class="mb-3">
-        <label for="image" class="form-label">Image</label>
-        <% if (listing.image) { %>
-            <div>
-                <img src="<%= listing.image.url %>" alt="Current Image" style="max-width: 200px; max-height: 200px;">
-            </div>
-        <% } %>
-        <input type="file" name="listing[image]" class="form-control">
-        <small class="form-text text-muted">Upload a new image (optional). Only jpeg, jpg, png, gif allowed.</small>
-    </div>
-      <br><br>
+        <label for="title" class="form-label">Title</label>
+        <input name="listing[title]" id="edit-blog-title"
+               value="<%= listing.title %>" type="text"
+               class="form-control" required>
+        <div class="valid-feedback">Title looks good!</div>
+      </div>
 
+      <!-- Description -->
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea name="listing[description]" class="form-control" required
+                  rows="8"><%= listing.description %></textarea>
+        <div class="valid-feedback">Thank you!</div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════
+           CURRENT IMAGE + AI IMAGE GENERATOR
+           ═══════════════════════════════════════════════════ -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Blog Image</label>
+
+        <!-- Current image preview -->
+        <% if (listing.image) { %>
+        <div style="margin-bottom:0.75rem">
+          <p style="font-size:0.78rem;color:#888;margin-bottom:0.3rem">📷 Current image:</p>
+          <img id="current-blog-img" src="<%= listing.image.url %>" alt="Current Image"
+               style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;border:2px solid #e5e7eb">
+        </div>
+        <% } %>
+
+        <!-- ✨ AI IMAGE GENERATOR for Edit -->
+        <div class="ai-section" style="margin-bottom:1rem">
+          <div class="ai-section-title">
+            <span class="ai-icon">🖼️</span> Change Image with AI
+          </div>
+          <p style="font-size:0.83rem;color:#555;margin-bottom:0.75rem">
+            Generate a new blog banner instantly — replaces the current image automatically.
+            <strong style="color:#10b981">No upload needed!</strong>
+          </p>
+
+          <!-- Style picker -->
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.85rem;flex-wrap:wrap">
+            <label style="font-size:0.8rem;font-weight:600;color:#555">🎨 Style:</label>
+            <select id="edit-ai-style" style="padding:0.35rem 0.75rem;border:2px solid rgba(108,99,255,0.25);border-radius:50px;font-size:0.8rem;outline:none;background:white;cursor:pointer">
+              <option value="realistic">📸 Realistic</option>
+              <option value="cartoon">🎨 Cartoon</option>
+              <option value="cyberpunk">🌆 Cyberpunk</option>
+              <option value="minimalist">⬜ Minimalist</option>
+            </select>
+            <button type="button" id="edit-generate-btn" class="btn-ai btn-ai-primary"
+                    onclick="generateEditAIImage()">
+              ✨ Generate New Image
+            </button>
+          </div>
+
+          <!-- Generated single image preview -->
+          <div id="edit-ai-panel" style="display:none;margin-bottom:1rem">
+            <img id="edit-ai-img" src="" alt="AI Generated"
+                 style="width:100%;max-height:260px;object-fit:cover;border-radius:12px;border:2px solid #6c63ff;box-shadow:0 4px 20px rgba(108,99,255,0.2)">
+            <div id="edit-ai-source" style="margin-top:0.4rem"></div>
+            <div style="display:flex;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap">
+              <button type="button" id="edit-use-btn" class="btn-ai btn-ai-primary" style="font-size:0.8rem"
+                      onclick="useEditAIImage()">✅ Use This Image</button>
+              <button type="button" class="btn-ai btn-ai-outline" style="font-size:0.8rem"
+                      onclick="generateEditAIImage()">🔄 Regenerate</button>
+              <button type="button" class="btn-ai btn-ai-outline" style="font-size:0.8rem;border-color:#ef4444;color:#ef4444"
+                      onclick="clearEditAI()">✕ Cancel</button>
+            </div>
+          </div>
+
+          <!-- Selected banner -->
+          <div id="edit-selected-banner" style="display:none;padding:0.6rem 1rem;background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1.5px solid #10b981;border-radius:10px;font-size:0.83rem;font-weight:600;color:#065f46">
+            ✅ AI image selected — will replace current image on save!
+          </div>
+        </div>
+
+        <input type="hidden" id="edit-ai-image-url" name="ai_image_url">
+
+        <!-- Manual upload (always optional on edit) -->
+        <div>
+          <label style="font-size:0.82rem;color:#555;font-weight:500">
+            Or upload manually (overrides AI selection):
+          </label>
+          <input type="file" name="listing[image]" class="form-control mt-1" accept="image/*">
+          <small class="text-muted">Only jpeg, jpg, png, gif. Leave blank to keep current image.</small>
+        </div>
+      </div>
+
+      <!-- Category -->
       <div class="mb-3">
         <label for="category" class="form-label">Category</label>
         <select name="listing[category]" class="form-control" required>
-           <option value="Animal" <%= listing.category === 'Animal' ? 'selected' : '' %>>Animal</option>
-            <option value="Travel" <%= listing.category === 'Travel' ? 'selected' : '' %>>Travel</option>
-            <option value="Food" <%= listing.category === 'Food' ? 'selected' : '' %>>Food</option>
-            <option value="Education" <%= listing.category === 'Education' ? 'selected' : '' %>>Education</option>
-            <option value="Art" <%= listing.category === 'Art' ? 'selected' : '' %>>Art</option>
-            <option value="Lifestyle" <%= listing.category === 'Lifestyle' ? 'selected' : '' %>>Lifestyle</option>
-            <option value="Entertainment" <%= listing.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
-            <option value="Sport" <%= listing.category === 'Personal' ? 'selected' : '' %>>Sport</option>
-            <option value="Technology" <%= listing.category === 'Technology' ? 'selected' : '' %>>Technology</option>
-            <!-- Add more categories as needed -->
+          <option value="Animal"        <%= listing.category === 'Animal'        ? 'selected' : '' %>>Animal</option>
+          <option value="Travel"        <%= listing.category === 'Travel'        ? 'selected' : '' %>>Travel</option>
+          <option value="Food"          <%= listing.category === 'Food'          ? 'selected' : '' %>>Food</option>
+          <option value="Education"     <%= listing.category === 'Education'     ? 'selected' : '' %>>Education</option>
+          <option value="Art"           <%= listing.category === 'Art'           ? 'selected' : '' %>>Art</option>
+          <option value="Lifestyle"     <%= listing.category === 'Lifestyle'     ? 'selected' : '' %>>Lifestyle</option>
+          <option value="Entertainment" <%= listing.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
+          <option value="Sport"         <%= listing.category === 'Sport'         ? 'selected' : '' %>>Sport</option>
+          <option value="Technology"    <%= listing.category === 'Technology'    ? 'selected' : '' %>>Technology</option>
         </select>
-    </div>
+      </div>
 
-      <button class="btn btn-dark edit-btn mt-3">Edit</button>
+      <br>
+      <button class="btn btn-dark edit-btn" type="submit">💾 Save Changes</button>
+      <br><br>
     </form>
   </div>
 </div>
 
+<script>
+// ── Edit page AI image helpers ─────────────────────────────────────────────────
+
+window.generateEditAIImage = async function () {
+    const titleEl  = document.getElementById("edit-blog-title");
+    const title    = titleEl ? titleEl.value.trim() : "<%= listing.title %>";
+    const style    = document.getElementById("edit-ai-style")?.value || "realistic";
+    const btn      = document.getElementById("edit-generate-btn");
+    const panel    = document.getElementById("edit-ai-panel");
+    const imgEl    = document.getElementById("edit-ai-img");
+    const sourceEl = document.getElementById("edit-ai-source");
+
+    if (!title) { alert("Please enter a title first!"); return; }
+
+    // Hide suggestions if open
+    const suggestionsPanel = document.getElementById("suggestions-panel");
+    if (suggestionsPanel) {
+        suggestionsPanel.style.display = "none";
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<span class="ai-spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:5px"></span> Generating...`;
+
+    try {
+        const resp = await fetch("/api/ai/generate-image", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title, style })
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error);
+
+        imgEl.src = data.imageUrl;
+        panel.style.display = "block";
+
+        // Source badge
+        if (sourceEl) {
+            sourceEl.innerHTML = data.isBase64
+                ? `<span style="background:linear-gradient(135deg,#6c63ff,#a78bfa);color:white;padding:0.15rem 0.6rem;border-radius:50px;font-size:0.7rem;font-weight:700">✨ Gemini AI</span>`
+                : `<span style="background:linear-gradient(135deg,#10b981,#34d399);color:white;padding:0.15rem 0.6rem;border-radius:50px;font-size:0.7rem;font-weight:700">🎨 Pollinations.ai</span>`;
+        }
+
+        // Store URL in hidden input
+        document.getElementById("edit-ai-image-url").value = data.imageUrl;
+
+    } catch (err) {
+        panel.innerHTML = `<div class="ai-error"><span>⚠️</span><span>${err.message}</span></div>`;
+        panel.style.display = "block";
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = "✨ Generate New Image";
+    }
+};
+
+window.useEditAIImage = function () {
+    const banner = document.getElementById("edit-selected-banner");
+    const currentImg = document.getElementById("current-blog-img");
+    const aiImg = document.getElementById("edit-ai-img");
+    if (banner) banner.style.display = "block";
+    // Update the current preview with AI image
+    if (currentImg && aiImg) currentImg.src = aiImg.src;
+    const btn = document.getElementById("edit-use-btn");
+    if (btn) { btn.innerHTML = "✅ Selected!"; btn.style.background = "linear-gradient(135deg,#10b981,#34d399)"; }
+    setTimeout(() => { if (btn) { btn.innerHTML = "✅ Use This Image"; btn.style.background = ""; } }, 2000);
+};
+
+window.clearEditAI = function () {
+    document.getElementById("edit-ai-panel").style.display = "none";
+    document.getElementById("edit-selected-banner").style.display = "none";
+    document.getElementById("edit-ai-image-url").value = "";
+};
+
+</script>

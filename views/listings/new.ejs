@@ -1,54 +1,116 @@
 <% layout("/layouts/boilerplate.ejs") %>
- 
-   <div class="row">
-      <div class="col-8 offset-2">
-        <br><br>
-       <h3>Creating a New Blog</h3>
 
-       <% if (messages.error && messages.error.length > 0) { %>
-        <div class="alert alert-danger">
-            <%= messages.error %>
-        </div>
-    <% } %>
-  
-    
-      <form    action="/listings" method="POST" novalidate class="needs-validation" enctype="multipart/form-data" >
+  <div class="row">
+    <div class="col-8 offset-2">
+      <br><br>
+      <h3>Creating a New Blog</h3>
+
+      <% if (messages.error && messages.error.length > 0) { %>
+        <div class="alert alert-danger"><%= messages.error %></div>
+      <% } %>
+
+      <form action="/listings" method="POST" novalidate class="needs-validation" enctype="multipart/form-data">
+
+        <!-- Title -->
         <div class="mb-3">
           <label for="title" class="form-label">Title</label>
-          <input name="listing[title]"
-           placeholder=" Add a catchy title"
-            type="text"
-           class="form-control"
-           required
-           >
-           <div class="valid-feedback">Title looks good!</div>
+          <input name="listing[title]" id="new-blog-title"
+            placeholder="Add a catchy title" type="text"
+            class="form-control" required>
+          <div class="valid-feedback">Title looks good!</div>
         </div>
 
-         <div class="mb-3">
-          
-          <label for="description" class="form-label"></label>
-          <textarea  name="listing[description]"
-          class="form-control"
-          rows="10"
-          cols="50" 
-           placeholder="Write your blog" 
-            required
-            ></textarea>
-            <div class="invalid-feedback">
-              please enter  description 
-                </div>
+        <!-- Blog Content -->
+        <div class="mb-3">
+          <label for="description" class="form-label">Blog Content</label>
+          <textarea name="listing[description]"
+            class="form-control" rows="10" cols="50"
+            placeholder="Write your blog content here..." required></textarea>
+          <div class="invalid-feedback">Please enter description</div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             ✨ AI IMAGE GENERATOR — Gemini 2.0 Flash
+             ═══════════════════════════════════════════════════════ -->
+        <div class="ai-section">
+          <div class="ai-section-title">
+            <span class="ai-icon">🖼️</span> AI Image Generator
+            <span class="ai-badge" style="background:linear-gradient(135deg,#6c63ff,#a78bfa)">✨ Gemini AI</span>
           </div>
-           <div class="mb-3">
-           
-           <label for="image" class="form-label">upload Image Link</label>
-           <input name="listing[image]" type="file" placeholder="enter image URL/LINK " class="form-control" required accept="image/*">
-           <div class="invalid-feedback">Please upload the image</div>
+          <div class="ai-image-section">
+            <p style="font-size:0.85rem;color:#555;margin-bottom:0.75rem">
+              Generate a blog banner using <strong>Gemini 2.0 Flash</strong> — auto-saved to your blog.
+              <strong style="color:#10b981">No manual upload needed!</strong>
+            </p>
+
+            <!-- Style picker -->
+            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.85rem;flex-wrap:wrap">
+              <label style="font-size:0.8rem;font-weight:600;color:#555">🎨 Style:</label>
+              <select id="ai-image-style" style="padding:0.35rem 0.75rem;border:2px solid rgba(108,99,255,0.25);border-radius:50px;font-size:0.8rem;outline:none;background:white;cursor:pointer">
+                <option value="realistic">📸 Realistic</option>
+                <option value="cartoon">🎨 Cartoon</option>
+                <option value="cyberpunk">🌆 Cyberpunk</option>
+                <option value="minimalist">⬜ Minimalist</option>
+              </select>
+            </div>
+
+            <button type="button" id="generate-img-btn" class="btn-ai btn-ai-primary" onclick="generateAIImage()">
+              ✨ Generate AI Image
+            </button>
+
+            <!-- Preview Panel (hidden until generated) -->
+            <div id="ai-image-panel" style="display:none;margin-top:1rem">
+              <img id="ai-generated-img" src="" alt="AI Generated Image"
+                style="width:100%;max-height:280px;object-fit:cover;border-radius:12px;box-shadow:0 4px 20px rgba(108,99,255,0.2)">
+              <div id="ai-image-source" style="margin-top:0.5rem"></div>
+
+              <!-- AI image chosen banner -->
+              <div id="ai-selected-banner" style="display:none;margin-top:0.75rem;padding:0.65rem 1rem;background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1.5px solid #10b981;border-radius:10px;font-size:0.83rem;font-weight:600;color:#065f46">
+                ✅ AI image will be used as your blog cover — <span style="font-weight:400">no upload needed!</span>
+              </div>
+
+              <div class="ai-image-actions" style="margin-top:0.75rem">
+                <button type="button" id="use-ai-image-btn" class="btn-ai btn-ai-primary" style="font-size:0.8rem">
+                  ✅ Use This Image (Skip Upload)
+                </button>
+                <button type="button" class="btn-ai btn-ai-outline" onclick="regenerateImage()" style="font-size:0.8rem">
+                  🔄 Regenerate
+                </button>
+                <button type="button" class="btn-ai btn-ai-outline" onclick="clearAIImage()" style="font-size:0.8rem;border-color:#ef4444;color:#ef4444">
+                  ✕ Remove
+                </button>
+              </div>
+            </div>
+
+            <input type="hidden" id="ai-image-url-hidden" name="ai_image_url">
           </div>
-         <br>
-         <div class="mb-3">
-          <label for="category" class="form-label" >Choose Category</label>
-          <select name="listing[category]" class="form-control" >
-            <option value="choose category"> Choose any category</option>
+        </div>
+
+        <!-- ─── OR divider ──────────────────────────────── -->
+        <div style="display:flex;align-items:center;gap:0.75rem;margin:1.25rem 0">
+          <hr style="flex:1;border-color:#ddd">
+          <span id="or-divider-text" style="font-size:0.78rem;color:#aaa;font-weight:600;white-space:nowrap">— OR upload manually —</span>
+          <hr style="flex:1;border-color:#ddd">
+        </div>
+
+        <!-- ─── Manual Upload (optional when AI image selected) ── -->
+        <div class="mb-3" id="manual-upload-section">
+          <label for="image" class="form-label">
+            Upload Blog Image
+            <span id="upload-optional-badge" style="display:none;font-size:0.73rem;font-weight:500;color:#10b981;margin-left:0.4rem">(Optional — AI image selected)</span>
+          </label>
+          <input id="manual-image-input" name="listing[image]" type="file"
+            class="form-control" accept="image/*">
+          <div class="invalid-feedback">Please upload an image or generate one with AI</div>
+          <small id="upload-hint" style="color:#888;font-size:0.78rem">Choose a file, or use the AI generator above</small>
+        </div>
+
+        <!-- Category -->
+        <br>
+        <div class="mb-3">
+          <label for="category" class="form-label">Choose Category</label>
+          <select name="listing[category]" class="form-control">
+            <option value="choose category">Choose any category</option>
             <option value="Animal">Animal</option>
             <option value="Travel">Travel</option>
             <option value="Food">Food</option>
@@ -58,16 +120,36 @@
             <option value="Entertainment">Entertainment</option>
             <option value="Sport">Sport</option>
             <option value="Technology">Technology</option>
-            
-            <!-- Add more categories as needed -->
           </select>
-          
-
         </div>
+
         <br><br>
-        <button class="btn btn-dark add-btn" type="submit" >Add</button>
+        <button class="btn btn-dark add-btn" type="submit">Add Blog</button>
         <br><br>
       </form>
-    
     </div>
   </div>
+
+  <script>
+    // ── Remove HTML5 "required" from file input if AI image is selected ────────
+    document.querySelector('form').addEventListener('submit', function (e) {
+        const aiUrl = document.getElementById('ai-image-url-hidden').value;
+        const fileInput = document.getElementById('manual-image-input');
+        if (aiUrl && aiUrl.trim()) {
+            fileInput.removeAttribute('required');
+        } else {
+            fileInput.setAttribute('required', '');
+        }
+    });
+
+    // ── clearAIImage ─────────────────────────────────────────────────────────
+    window.clearAIImage = function () {
+        document.getElementById('ai-image-url-hidden').value = '';
+        document.getElementById('ai-image-panel').style.display = 'none';
+        document.getElementById('ai-selected-banner').style.display = 'none';
+        document.getElementById('upload-optional-badge').style.display = 'none';
+        document.getElementById('manual-image-input').setAttribute('required', '');
+        document.getElementById('or-divider-text').textContent = '— OR upload manually —';
+        document.getElementById('upload-hint').textContent = 'Choose a file, or use the AI generator above';
+    };
+  </script>

@@ -1,49 +1,77 @@
-<% layout("/layouts/boilerplate.ejs") %> 
+<%- layout("/layouts/boilerplate.ejs") %>
 
-        <% if (messages.error && messages.error.length > 0) { %>
-          <div class="alert alert-danger">
-              <%= messages.error %>
+<!-- Hero Header -->
+<div class="hero-search">
+  <h1>Discover Stories<br>Worth Reading</h1>
+  <p class="subtitle">Explore ideas, insights, and inspiration from our community of writers.</p>
+
+  <!-- AI Smart Search -->
+  <div class="smart-search-wrap">
+    <div class="ai-section-title" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.6rem;font-size:0.82rem;letter-spacing:0.06em;text-transform:uppercase;color:#8892a4">
+      <span>✦</span> Smart AI Search
+      <span style="margin-left:auto;font-size:0.68rem;background:linear-gradient(135deg,#7c6aff,#22d3ee);color:white;padding:0.18rem 0.6rem;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">AI Powered</span>
+    </div>
+    <form class="smart-search-input-wrap" onsubmit="runSmartSearch(event)">
+      <input type="text" id="smart-search-input" class="smart-search-input"
+             placeholder="🔍  Describe what you're looking for — try 'travel stories' or 'healthy recipes'…">
+      <button type="submit" class="btn-primary-grad">Search</button>
+    </form>
+    <div id="smart-search-results" class="smart-search-results" style="display:none"></div>
+  </div>
+
+  <!-- Classic Filter -->
+  <form method="GET" action="/listings" class="filter-bar">
+    <input type="text" name="search" placeholder="🔎  Keyword search…"
+           value="<%= search || '' %>"/>
+    <select name="category" style="width:auto">
+      <option value="Choose category">All Categories</option>
+      <option value="Animal">🐾 Animal</option>
+      <option value="Travel">✈️ Travel</option>
+      <option value="Food">🍜 Food</option>
+      <option value="Education">📚 Education</option>
+      <option value="Art">🎨 Art</option>
+      <option value="Lifestyle">🌿 Lifestyle</option>
+      <option value="Entertainment">🎬 Entertainment</option>
+      <option value="Sport">⚽ Sport</option>
+      <option value="Technology">💻 Technology</option>
+    </select>
+    <button type="submit" class="btn-primary-grad">Filter</button>
+  </form>
+</div>
+
+<!-- Blog Grid -->
+<div class="section-header">
+  <h2 class="section-title">Latest Posts</h2>
+  <span class="section-count"><%= allListings.length %> articles</span>
+</div>
+
+<% if (allListings.length === 0) { %>
+  <div class="no-blogs-found" style="text-align:center;padding:4rem 2rem;background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.1);border-radius:16px;margin:2rem 0">
+    <div style="font-size:3rem;margin-bottom:1rem">🔎</div>
+    <h4 style="color:#f3f4f6;margin-bottom:0.5rem;font-weight:700">No Blogs Found</h4>
+    <p style="color:#9ca3af;font-size:0.9rem;max-width:400px;margin:0 auto">We couldn't find any blogs matching your criteria. Try searching for something else or browse another category!</p>
+  </div>
+<% } else { %>
+  <div class="blogs-grid">
+    <% for(let listing of allListings) { %>
+    <a href="/listings/<%= listing._id %>" class="listing-link blog-card">
+      <div class="blog-card-img-wrap">
+        <img src="<%= listing.image.url %>" alt="<%= listing.title %>" loading="lazy">
+        <div class="blog-card-overlay"></div>
+        <span class="blog-card-category"><%= listing.category %></span>
+      </div>
+      <div class="blog-card-body">
+        <div class="blog-card-title"><%= listing.title %></div>
+        <div class="blog-card-meta">
+          <div class="blog-card-rating">
+            ⭐ <%= listing.averageRating !== undefined ? listing.averageRating.toFixed(1) : 'N/A' %>
           </div>
-      <% } %>
-
-        <form method="GET" action="/listings" class="mb-3  d-flex align-items-center">
-          <input type="text" name="search" placeholder="Search Blog..." value="<%= search || '' %>" class="form-control me-3" style="flex-grow: 1;" />
-          <button type="submit" class="btn btn-dark mt-2">Search</button>
-          <select name="category" class="form-control me-2" style="width: auto;" >
-            <option value="Choose category">All Categories</option>
-            <option value="Animal">Animal</option>
-            <option value="Travel">Travel</option>
-            <option value="Food">Food</option>
-            <option value="Education">Education</option>
-            <option value="Art">Art</option>
-            <option value="Lifestyle">Lifestyle</option>
-            <option value="Entertainment">Entertainment</option>
-            <option value="Sport">Sport</option>
-            <option value="Technology">Technology</option>
-            <!-- Add more categories as needed -->
-          </select>
-          <button type="submit" class="btn btn-dark mt-2">Search</button>
-      </form>
-
-           <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-3">
-
-               <%  for(let listing of allListings) { %>
-                <a href="/listings/<%= listing._id %>" class="listing-link" >
-               <div class="card col listing-card" style="width: 20rem;">
-                <img src="<%= listing.image.url %>" class="card-img-top" alt="listing_image" style="height: 20rem;">
-                 <div class="card-img-overlay"></div>
-                <div class="card-body">
-                  <p class="card-text">
-                    <b><%= listing.title %></b><br>
-                    <!-- <span>Average Rating: <%= listing.averageRating.toFixed(1) %></span> -->
-                    <span>Average Rating: <%= listing.averageRating !== undefined ? listing.averageRating.toFixed(1) : 'N/A' %></span>
- 
-                  </p>
-                </div>
-              </div>
-            </a>
-              <% } %>
-           </div>
-
-
-
+          <div class="blog-card-author">
+            <% if(listing.owner) { %>by <%= listing.owner.username %><% } %>
+          </div>
+        </div>
+      </div>
+    </a>
+    <% } %>
+  </div>
+<% } %>

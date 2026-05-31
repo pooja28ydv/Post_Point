@@ -3,163 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blogger</title>
-    
-    <style>
-      :root {
-        --primary-color: #4a90e2;
-        --secondary-color: #f5f7fa;
-        --text-color: #333;
-        --bg-color: #fff;
-        --shadow-color: rgba(0, 0, 0, 0.1);
-        --border-radius: 8px;
-        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      }
-    
-      body {
-        margin: 0;
-        font-family: var(--font-family);
-        background-color: var(--secondary-color);
-        color: var(--text-color);
-        line-height: 1.6;
-      }
-    
-      header {
-        background: var(--primary-color);
-        color: white;
-        padding: 1rem;
-        text-align: center;
-        font-size: 1.4rem;
-        font-weight: bold;
-      }
-    
-      .container {
-        max-width: 960px;
-        margin: 1rem auto;
-        padding: 0 1rem;
-      }
-    
-      .search-filters {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-      }
-    
-      .search-filters input[type="text"],
-      .search-filters select {
-        flex: 1 1 150px;
-        padding: 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: var(--border-radius);
-        font-size: 1rem;
-      }
-    
-      .listings-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
-        gap: 1rem;
-      }
-    
-      .listing-card {
-        background: var(--bg-color);
-        border-radius: var(--border-radius);
-        box-shadow: 0 2px 6px var(--shadow-color);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        transition: box-shadow 0.3s ease;
-      }
-    
-      .listing-card:hover {
-        box-shadow: 0 6px 12px var(--shadow-color);
-      }
-    
-      .listing-image {
-        width: 100%;
-        aspect-ratio: 4 / 3;
-        object-fit: cover;
-      }
-    
-      .listing-content {
-        flex: 1;
-        padding: 1rem;
-        display: flex;
-        flex-direction: column;
-      }
-    
-      .listing-title {
-        font-size: 1.25rem;
-        margin: 0 0 0.5rem;
-        flex-grow: 0;
-        color: var(--primary-color);
-        text-decoration: none;
-      }
-    
-      .listing-description {
-        flex-grow: 1;
-        font-size: 0.9rem;
-        margin-bottom: 0.75rem;
-        color: #555;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 4;
-        -webkit-box-orient: vertical;
-      }
-    
-      .listing-footer {
-        font-size: 0.85rem;
-        color: #666;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-    
-      .rating {
-        font-weight: bold;
-        color: #f39c12; /* gold color */
-      }
-    
-      .no-results {
-        text-align: center;
-        font-size: 1.1rem;
-        color: #999;
-        margin-top: 2rem;
-      }
-    
-      /* Responsive tweaks */
-      @media (max-width: 600px) {
-        .search-filters {
-          flex-direction: column;
-        }
-      }
-    </style>
+    <title>PostPoint — AI Blog Platform</title>
+    <meta name="description" content="PostPoint — Discover, write and share stories that matter. Powered by AI.">
 
-    <link rel="stylesheet" href="/css/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-     rel="stylesheet"
-     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
      crossorigin="anonymous">
-     <link rel="stylesheet" 
-     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" 
-     integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" 
-     crossorigin="anonymous"
-     referrerpolicy="no-referrer" />
-     <link href="/css/rating.css" rel="stylesheet">
-    
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+     integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+     crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+    <!-- App CSS -->
+    <link href="/css/rating.css" rel="stylesheet">
+    <link href="/css/ai-features.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <%- include("../includes/navbar.ejs") %>
-    <div class="container">
-     <%- include("../includes/flash.ejs") %> 
-     <%- body %>
+    <div class="container" style="padding-top:1.5rem;padding-bottom:2rem">
+      <%- include("../includes/flash.ejs") %>
+      <%- body %>
     </div>
     <%- include("../includes/footer.ejs") %>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
      crossorigin="anonymous"></script>
-   <script src="/js/script.js"></script>
+    <script src="/js/script.js"></script>
+    <script src="/js/ai-features.js"></script>
 </body>
 </html>

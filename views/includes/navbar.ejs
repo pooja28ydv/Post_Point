@@ -1,26 +1,38 @@
 
+<nav class="navbar navbar-expand-md">
+  <div class="container-fluid" style="max-width:1280px;margin:0 auto;padding:0 1.5rem">
 
-<nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#"><i class="fa-solid fa-pen-to-square"></i></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" >
+    <!-- Brand -->
+    <a class="navbar-brand" href="/listings">
+      <span class="brand-dot"></span>
+      PostPoint
+    </a>
+
+    <!-- Mobile Toggle -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-link" href="/listings">All Blogs</a>
-        
-      <div class="navbar-nav ms-auto">
-        <a class="nav-link" href="/listings/new">Add New Blog</a>
-      <% if(typeof currUser === 'undefined' || !currUser) { %>  
-      
-      <a class="nav-link active" aria-current="page" href="/signup"> <b>Signup</b></a>
-      <a class="nav-link" href="/login"><b>Log in</b></a>
 
-       <% }  else { %>  
-        <a class="nav-link" href="/logout"><b>Log out</b></a>
+    <!-- Links -->
+    <div class="collapse navbar-collapse" id="navMain">
+      <div class="navbar-nav me-auto gap-1">
+        <a class="nav-link" href="/listings">All Blogs</a>
+      </div>
+
+      <div class="navbar-nav ms-auto gap-2 align-items-center">
+        <% if(typeof currUser === 'undefined' || !currUser) { %>
+          <a class="nav-link" href="/listings/new">Write</a>
+          <a class="nav-link nav-btn-ghost" href="/login">Log in</a>
+          <a class="nav-link nav-btn-primary" href="/signup">Get Started</a>
+        <% } else { %>
+          <a class="nav-link" href="/listings/new">✏️ Write</a>
+          <span class="nav-link" style="color:#8892a4;font-size:0.85rem;cursor:default">
+            👤 <%= currUser.username %>
+          </span>
+          <a class="nav-link nav-btn-ghost" href="/logout">Log out</a>
         <% } %>
       </div>
     </div>
+
   </div>
 </nav>

@@ -61,26 +61,27 @@ router.route("/")
             console.log("POST /listings - After upload middleware");
             console.log("File validation error:", req.fileValidationError);
             console.log("File:", req.file ? "Present" : "Missing");
-            
+            console.log("AI Image URL:", req.body.ai_image_url ? "Present" : "Missing");
+
             // Check for file validation error
             if (req.fileValidationError) {
-                console.log("File validation error:", req.fileValidationError);
                 req.flash('error', req.fileValidationError);
                 return res.redirect("/listings/new");
             }
-            
-            // Check if file was uploaded
-            if (!req.file) {
-                console.log("No file uploaded");
-                req.flash('error', 'Please upload an image file');
+
+            // ✅ Allow AI-generated image to bypass file upload requirement
+            const hasAiImage = req.body.ai_image_url && req.body.ai_image_url.trim().length > 0;
+            if (!req.file && !hasAiImage) {
+                req.flash('error', 'Please upload an image file or generate an AI image');
                 return res.redirect("/listings/new");
             }
-            
+
             next();
         },
         validateListing,
         wrapAsync(listingController.createListing)
     );
+
     
  
 //NEW ROUTE
@@ -89,24 +90,22 @@ router.get("/new", isLoggedIn, listingController.renderNewForm);
 router.route("/:id")
       .get( isLoggedIn,wrapAsync (listingController.showListing))
       .put(
-            isLoggedIn ,
-            isOwner ,
-            upload.single('listing[image]'), 
+            isLoggedIn,
+            isOwner,
+            upload.single('listing[image]'),
+            (req, res, next) => {
+                if (req.fileValidationError) {
+                    req.flash('error', req.fileValidationError);
+                    return res.redirect(`/listings/${req.params.id}/edit`);
+                }
+                // AI image URL is allowed as alternative — no file required on edit
+                next();
+            },
             validateListing,
-            wrapAsync(async (req, res, next) => {
-                  // Check if there was an error during the upload
-                  if (req.fileValidationError) {
-                      req.flash('error', req.fileValidationError);
-                      return res.redirect(`/listings/${req.params.id}/edit`); // Redirect back to the edit page
-                  }
-                  // Proceed to update the listing if no errors
-                  await listingController.updateListing(req, res, next);
-              })
-      
-            //  wrapAsync( listingController.updateListing)
-
-            )   
+            wrapAsync(listingController.updateListing)
+      )
       .delete(isLoggedIn, isOwner, wrapAsync(listingController.deleteListing))
+
 
 
 //Edit Route

@@ -1,103 +1,177 @@
 <%- layout("/layouts/boilerplate.ejs") %>
-<body>
-  <div class="row mt-3">
-     <div class="col-8 offset-3">
-    <h3><%= listing.title  %></h3>
+
+<!-- Hidden data for JS -->
+<span id="blog-title-data"   data-title="<%= listing.title %>"      style="display:none"></span>
+<span id="blog-content-data" data-content="<%= listing.description.replace(/"/g, '&quot;') %>" style="display:none"></span>
+
+<div style="max-width:860px;margin:0 auto;padding-bottom:4rem">
+
+  <!-- ── Hero Image ──────────────────────────────────── -->
+  <div class="show-hero">
+    <img src="<%= listing.image.url %>" alt="<%= listing.title %>">
+    <div class="show-hero-overlay"></div>
+    <div class="show-hero-content">
+      <span class="show-category-badge"><%= listing.category %></span>
+      <div class="show-hero-title"><%= listing.title %></div>
     </div>
-    <div class="card col-6 offset-3 show-card listing-card">
- 
-       <img src="<%= listing.image.url %>"
-        class="card-img-top show-img" alt="listing_image">
-       <div class="card-body">
-         <p class="card-text"> created by<i> <%= listing.owner.username %></i></p>
-         <p class="card-text" ><%= listing.description %> </p>  
-             
-              
-     </div>
+  </div>
+
+  <!-- ── Blog Content Card ──────────────────────────── -->
+  <div class="show-card">
+    <div class="show-meta-row">
+      <div class="show-meta-item">
+        <span>✍️</span>
+        <span>By <strong><%= listing.owner ? listing.owner.username : 'Unknown' %></strong></span>
+      </div>
+      <div class="show-meta-item">
+        <span>📁</span>
+        <span><strong><%= listing.category %></strong></span>
+      </div>
+      <div class="show-meta-item" style="margin-left:auto">
+        <span style="color:#f59e0b">⭐</span>
+        <strong><%= listing.averageRating !== undefined ? listing.averageRating.toFixed(1) : 'No ratings yet' %></strong>
+      </div>
     </div>
-    <br/>
-    
-  </div> 
-  <br>  
 
-  <% if( currUser &&  listing.owner._id.equals(currUser._id)) { %>
-  <div class="btns">
- <a href="/listings/<%= listing._id %>/edit" 
-  class="btn btn-dark col-2 offset-3 edit-btn">
-  Edit</a>
-     <form method="POST" action="/listings/<%=listing._id %>?_method=DELETE">
-       <button class="btn btn-dark offset-3">DELETE</button>
-     </form>
-   </div>
+    <p class="show-description"><%= listing.description %></p>
 
-   <% } %>
-   
-   
-   <div class="col-8 offset-3 mb-3">
-     <hr>
-     <% if(currUser){ %>
-    
-     <h4>Leave a Review</h4>
-     <form action="/listings/<%= listing.id %>/reviews"
-       method="POST"
-       novalidate 
-      class="needs-validation" >
-  
-      <div class="mb-3 mt-3">
-        <label for="rating" class="form-label" >Rating</label>
-      <fieldset class="starability-slot">
-      
-        <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="0" checked aria-label="No rating." />
-        <input type="radio" id="first-rate1" name="review[rating]" value="1" />
-        <label for="first-rate1" title="Terrible">1 star</label>
-        <input type="radio" id="first-rate2" name="review[rating]" value="2" />
-        <label for="first-rate2" title="Not good">2 stars</label>
-        <input type="radio" id="first-rate3" name="review[rating]" value="3" />
-        <label for="first-rate3" title="Average">3 stars</label>
-        <input type="radio" id="first-rate4" name="review[rating]" value="4" />
-        <label for="first-rate4" title="Very good">4 stars</label>
-        <input type="radio" id="first-rate5" name="review[rating]" value="5" />
-        <label for="first-rate5" title="Amazing">5 stars</label>
-      </fieldset>
+    <!-- Owner Controls -->
+    <% if (currUser && listing.owner._id.equals(currUser._id)) { %>
+    <div style="display:flex;gap:0.75rem;margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+      <a href="/listings/<%= listing._id %>/edit" class="btn-primary-grad" style="text-decoration:none">✏️ Edit Blog</a>
+      <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" style="display:inline">
+        <button class="btn-danger-grad">🗑️ Delete</button>
+      </form>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       AI FEATURE 1: Quality Score
+       ══════════════════════════════════════════════════ -->
+  <div class="ai-section">
+    <div class="ai-section-title">
+      <span class="ai-icon">⭐</span> AI Quality Score
+      <span class="ai-badge" style="background:linear-gradient(135deg,#f59e0b,#d97706)">Analysis</span>
+    </div>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.85rem">
+      Analyze readability, SEO quality, engagement & structure of this blog.
+    </p>
+    <button class="btn-ai btn-ai-primary" onclick="analyzeQuality()">⭐ Analyze Quality</button>
+    <div id="quality-panel" class="ai-panel hidden" style="margin-top:1rem"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       AI FEATURE 2: Translation
+       ══════════════════════════════════════════════════ -->
+  <div class="ai-section">
+    <div class="ai-section-title">
+      <span class="ai-icon">🌐</span> AI Auto Translation
+    </div>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.85rem">Read this blog in your language:</p>
+    <div class="lang-tabs">
+      <button class="lang-tab active" onclick="showOriginal()">🇺🇸 English (Original)</button>
+      <button class="lang-tab" onclick="translateBlog('hindi',   '🇮🇳')">🇮🇳 हिंदी</button>
+      <button class="lang-tab" onclick="translateBlog('french',  '🇫🇷')">🇫🇷 French</button>
+      <button class="lang-tab" onclick="translateBlog('spanish', '🇪🇸')">🇪🇸 Spanish</button>
+      <button class="lang-tab" onclick="translateBlog('japanese','🇯🇵')">🇯🇵 Japanese</button>
+    </div>
+    <div id="translation-panel" class="ai-panel hidden"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       AI FEATURE 3: Originality Check (owner only)
+       ══════════════════════════════════════════════════ -->
+  <% if (currUser && listing.owner._id.equals(currUser._id)) { %>
+  <div class="ai-section">
+    <div class="ai-section-title">
+      <span class="ai-icon">🔎</span> Originality Checker
+    </div>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.85rem">
+      Check how original this blog is compared to others on the platform.
+    </p>
+    <button class="btn-ai btn-ai-danger" onclick="checkPlagiarism()">🔎 Check Originality</button>
+    <div id="plagiarism-panel" class="ai-panel hidden" style="margin-top:1rem"></div>
+  </div>
+  <% } %>
+
+  <!-- ── Review Form ─────────────────────────────────── -->
+  <% if(currUser){ %>
+  <div class="review-form-card">
+    <h5>✍️ Leave a Review</h5>
+    <form action="/listings/<%= listing.id %>/reviews" method="POST" novalidate class="needs-validation">
+      <div class="form-group">
+        <label class="form-label">Your Rating</label>
+        <fieldset class="starability-slot">
+          <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="0" checked aria-label="No rating."/>
+          <input type="radio" id="first-rate1" name="review[rating]" value="1"/>
+          <label for="first-rate1" title="Terrible">1 star</label>
+          <input type="radio" id="first-rate2" name="review[rating]" value="2"/>
+          <label for="first-rate2" title="Not good">2 stars</label>
+          <input type="radio" id="first-rate3" name="review[rating]" value="3"/>
+          <label for="first-rate3" title="Average">3 stars</label>
+          <input type="radio" id="first-rate4" name="review[rating]" value="4"/>
+          <label for="first-rate4" title="Very good">4 stars</label>
+          <input type="radio" id="first-rate5" name="review[rating]" value="5"/>
+          <label for="first-rate5" title="Amazing">5 stars</label>
+        </fieldset>
       </div>
-      <div class="mb-3 mt-3">
-        <label for="comment" class="form-label">Comments</label>
-        <textarea name="review[comment]"
-        id="comment"
-        cols="30"
-        rows="5"
-        class="form-control"
-        required
-            ></textarea>
-            <div class="invalid-feedback">
-              Please add some comments for review
-            </div>
+      <div class="form-group">
+        <label for="comment" class="form-label">Your Comment</label>
+        <textarea name="review[comment]" id="comment" rows="4" class="form-control" required placeholder="Share your thoughts…"></textarea>
+        <div class="invalid-feedback">Please add a comment.</div>
       </div>
-      <button class="btn btn-outline-dark">Submit</button>
-     </form>
-     <% } %>
-     <hr>
-        
-          <hr>
-          <div class="row">
-          <p><b>All Reviews</b></p>
-          <% for (review of listing.reviews) { %>
-          <div class="card col-5 ms-3 mb-3">
-            <div class="card-body">
-              <h5 class="card-title"><%= review.author.username %></h5>
-              <p class="card-text"><%= review.comment %></p>
-              <P class="card-text"> Rating: <%= review.rating %> </P>
-              <p class="starability-result card-text" data-rating="<%= review.rating %>"> </p>
-               
-            
-                <% if (currUser  && review.author._id.equals(currUser ._id)) { %>
-                  <a class="btn btn-sm btn-dark" href="/listings/<%= listing._id %>/reviews/<%= review._id %>/edit">Edit</a>
-                  <form class="mb-3" method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" >
-                    <button class="btn btn-sm btn-dark">Delete</button>
-                  </form>
-                <% } %>
-          </div>
-        </div>  
-        <% } %>
+      <button type="submit" class="btn-primary-grad">Submit Review</button>
+    </form>
+  </div>
+  <% } %>
 
- </div>
+  <!-- ── All Reviews ─────────────────────────────────── -->
+  <% if(listing.reviews.length > 0) { %>
+  <div class="reviews-section">
+    <h5>💬 All Reviews (<%= listing.reviews.filter(r => r.author).length %>)</h5>
+    <% for (review of listing.reviews) { %>
+    <% if (review.author) { %>
+    <div class="review-card">
+      <div class="review-author">
+        <div class="review-author-avatar"><%= review.author.username.charAt(0).toUpperCase() %></div>
+        <%= review.author.username %>
+      </div>
+      <p class="starability-result" data-rating="<%= review.rating %>" style="margin:0.3rem 0 0.5rem"></p>
+      <p class="review-comment"><%= review.comment %></p>
+      <% if (currUser && review.author._id.equals(currUser._id)) { %>
+      <div class="review-actions">
+        <a class="btn-outline-grad" style="font-size:0.78rem;padding:0.28rem 0.75rem;text-decoration:none"
+           href="/listings/<%= listing._id %>/reviews/<%= review._id %>/edit">Edit</a>
+        <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" style="display:inline">
+          <button class="btn-danger-grad" style="font-size:0.78rem;padding:0.28rem 0.75rem">Delete</button>
+        </form>
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+    <% } %>
+  </div>
+  <% } %>
+
+  <!-- ══════════════════════════════════════════════════
+       AI FEATURE 4: Recommendations
+       ══════════════════════════════════════════════════ -->
+  <div class="ai-section" style="margin-top:1.5rem">
+    <div class="ai-section-title">
+      <span class="ai-icon">🤖</span> You Might Also Like
+      <span class="ai-badge">AI Picks</span>
+    </div>
+    <div id="recommendations-panel" class="ai-loader">
+      <div class="ai-spinner" style="width:28px;height:28px;border-width:3px"></div>
+      <p style="font-size:0.82rem;margin-top:0.5rem;color:var(--muted)">Finding similar blogs…</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    loadRecommendations("<%= listing._id %>");
+  });
+</script>
