@@ -45,3 +45,24 @@ module.exports.logout = (req,res) => {
         res.redirect("/listings");
        })
 };
+
+module.exports.renderProfile = async (req, res) => {
+    const user = await User.findById(req.user._id);
+    res.render("users/profile.ejs", { user });
+};
+
+module.exports.updateProfile = async (req, res) => {
+    const { bio } = req.body;
+    const updateData = { bio };
+    
+    if (req.file) {
+        updateData.profileImage = {
+            url: req.file.path,
+            filename: req.file.filename
+        };
+    }
+    
+    await User.findByIdAndUpdate(req.user._id, updateData);
+    req.flash("success", "Profile updated successfully!");
+    res.redirect("/profile");
+};

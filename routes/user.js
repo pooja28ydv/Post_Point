@@ -3,7 +3,10 @@ const router = express.Router({ mergeParams : true});
 const User = require("../models/user.js"); 
 const wrapAsync = require("../utils/wrapAsync.js");
 const passport = require("passport");
-const { saveRedirectUrl } = require("../middleware.js");
+const { isLoggedIn, saveRedirectUrl } = require("../middleware.js");
+const multer = require("multer");
+const { storage } = require("../cloudConfig.js");
+const upload = multer({ storage });
 
 const userController = require("../controllers/users.js");
 
@@ -24,7 +27,9 @@ router.route("/login")
 
 router.get("/logout", userController.logout);
 
-
+router.route("/profile")
+       .get(isLoggedIn, wrapAsync(userController.renderProfile))
+       .put(isLoggedIn, upload.single("profileImage"), wrapAsync(userController.updateProfile));
 
 module.exports = router;
 

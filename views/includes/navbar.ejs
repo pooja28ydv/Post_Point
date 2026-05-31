@@ -26,9 +26,9 @@
           <a class="nav-link nav-btn-primary" href="/signup">Get Started</a>
         <% } else { %>
           <a class="nav-link" href="/listings/new">✏️ Write</a>
-          <span class="nav-link" style="color:#8892a4;font-size:0.85rem;cursor:default">
+          <a class="nav-link" href="/profile" style="color:#8892a4;font-size:0.85rem;text-decoration:none">
             👤 <%= currUser.username %>
-          </span>
+          </a>
           <a class="nav-link nav-btn-ghost" href="/logout">Log out</a>
         <% } %>
       </div>

@@ -44,6 +44,30 @@
       </form>
     </div>
     <% } %>
+
+    <!-- About the Author Card -->
+    <% if (listing.owner) { %>
+    <div class="author-profile-card" style="
+      margin-top: 2.5rem;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      display: flex;
+      gap: 1.25rem;
+      align-items: center;
+    ">
+      <img src="<%= listing.owner.profileImage && listing.owner.profileImage.url ? listing.owner.profileImage.url : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80' %>" 
+           alt="<%= listing.owner.username %>" 
+           style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid #7c6aff; flex-shrink: 0;">
+      <div>
+        <h5 style="color: var(--text-bright); font-weight: 700; margin-bottom: 0.3rem;">About @<%= listing.owner.username %></h5>
+        <p style="color: var(--muted); font-size: 0.85rem; line-height: 1.5; margin: 0;">
+          <%= listing.owner.bio || "This author hasn't written a bio yet." %>
+        </p>
+      </div>
+    </div>
+    <% } %>
   </div>
 
   <!-- ══════════════════════════════════════════════════

@@ -101,6 +101,15 @@ app.use(async (req,res,next) => {
     next();
 });
 
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
+app.get("/", (req, res) => {
+    if (req.isAuthenticated && req.isAuthenticated()) {
+        return res.redirect("/listings");
+    }
+    res.redirect("/login");
+});
+
 app.use("/",userRouter);
 app.use("/listings", listingRouter)
 app.use("/listings", reviewRouter);

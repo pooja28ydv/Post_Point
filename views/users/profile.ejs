@@ -1,0 +1,129 @@
+<%- layout("/layouts/boilerplate.ejs") %>
+
+<div class="row justify-content-center" style="margin-top: 3rem; margin-bottom: 3rem;">
+  <div class="col-xl-6 col-lg-8 col-md-10 col-sm-12">
+    <div class="card" style="
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    ">
+      
+      <!-- Profile Header Info -->
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="
+          background: linear-gradient(135deg, #7c6aff, #22d3ee);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          font-weight: 800;
+          margin-bottom: 0.5rem;
+        ">Your Profile</h2>
+        <p style="color: var(--muted); font-size: 0.9rem;">Manage your PostPoint author details</p>
+      </div>
+
+      <!-- Main Profile Form -->
+      <form action="/profile?_method=PUT" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+        
+        <!-- Avatar Preview and Upload -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+          <div style="position: relative; width: 140px; height: 140px;">
+            <img id="avatar-preview" src="<%= user.profileImage && user.profileImage.url ? user.profileImage.url : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80' %>" 
+                 alt="<%= user.username %>" 
+                 style="
+                   width: 140px; 
+                   height: 140px; 
+                   border-radius: 50%; 
+                   object-fit: cover; 
+                   border: 3px solid #7c6aff; 
+                   box-shadow: 0 0 20px rgba(124, 106, 255, 0.4);
+                   transition: transform 0.3s ease;
+                 "
+                 onmouseover="this.style.transform='scale(1.05)'"
+                 onmouseout="this.style.transform='scale(1)'"
+            >
+          </div>
+          
+          <div style="text-align: center;">
+            <h4 style="color: var(--text-bright); font-weight: 700; margin-bottom: 0.2rem;">@<%= user.username %></h4>
+            <p style="color: var(--muted); font-size: 0.83rem; margin-bottom: 0.8rem;"><%= user.email %></p>
+            
+            <!-- Styled File Input Button -->
+            <label class="btn-ai btn-ai-outline" style="cursor: pointer; display: inline-block; font-size: 0.82rem; padding: 0.5rem 1rem;">
+              📷 Upload New Photo
+              <input type="file" name="profileImage" id="profile-image-input" accept="image/*" style="display: none;" onchange="previewAvatar(event)">
+            </label>
+          </div>
+        </div>
+
+        <!-- Bio / Description Field -->
+        <div class="mb-4">
+          <label for="bio" class="form-label" style="font-weight: 600; color: var(--text-bright); font-size: 0.9rem;">Profile Bio</label>
+          <textarea name="bio" id="bio" class="form-control" rows="5" 
+                    placeholder="Tell your readers about yourself, your areas of interest, or your background..." 
+                    style="
+                      background: rgba(0, 0, 0, 0.2);
+                      border: 1px solid rgba(255, 255, 255, 0.1);
+                      color: var(--text-bright);
+                      border-radius: 12px;
+                      padding: 0.85rem;
+                      font-size: 0.9rem;
+                      resize: none;
+                    "
+          ><%= user.bio %></textarea>
+          <div style="margin-top: 0.4rem; display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted)">
+            <span>Add your personal touch to display on your blogs.</span>
+            <span id="char-count">0/500</span>
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <div style="margin-top: 2rem;">
+          <button type="submit" class="btn-primary-grad" style="
+            width: 100%; 
+            padding: 0.85rem; 
+            border-radius: 12px; 
+            font-size: 0.95rem; 
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(124, 106, 255, 0.35);
+          ">💾 Save Changes</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Avatar preview before upload
+  function previewAvatar(event) {
+    const input = event.target;
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('avatar-preview').src = e.target.result;
+      }
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  // Character counter for bio
+  const bioInput = document.getElementById('bio');
+  const charCount = document.getElementById('char-count');
+  
+  function updateCharCount() {
+    const len = bioInput.value.length;
+    charCount.textContent = `${len}/500`;
+    if (len > 500) {
+      charCount.style.color = '#ef4444';
+    } else {
+      charCount.style.color = 'var(--muted)';
+    }
+  }
+
+  bioInput.addEventListener('input', updateCharCount);
+  // Initial run
+  updateCharCount();
+</script>
